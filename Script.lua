@@ -490,7 +490,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Fly, Speed & Aimbot
+-- Fly, Speed & Gelişmiş Takım Filtreli Aimbot
 local bv, bg
 RunService.RenderStepped:Connect(function()
     local char = localPlayer.Character
@@ -540,8 +540,17 @@ if aimbotActive then
 
         for _, player in pairs(Players:GetPlayers()) do
             if player ~= localPlayer then
-                local isTeam = teamCheckActive and player.Team and localPlayer.Team and player.Team == localPlayer.Team
-                if not isTeam and player.Character and player.Character:FindFirstChild("Head") then
+                -- Gelişmiş Katı Takım Kontrolü (Kendi takımına asla nişan almaz)
+                local isTeamMate = false
+                if teamCheckActive then
+                    if player.Team and localPlayer.Team and player.Team == localPlayer.Team then
+                        isTeamMate = true
+                    elseif player.TeamColor and localPlayer.TeamColor and player.TeamColor == localPlayer.TeamColor then
+                        isTeamMate = true
+                    end
+                end
+
+                if not isTeamMate and player.Character and player.Character:FindFirstChild("Head") then
                     local head = player.Character.Head
                     local pos, onScreen = camera:WorldToViewportPoint(head.Position)
                     if onScreen then
