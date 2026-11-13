@@ -157,7 +157,7 @@ local function createTab(name)
     page.Size = UDim2.new(1, 0, 1, 0)
     page.BackgroundTransparency = 1
     page.Visible = false
-    page.CanvasSize = UDim2.new(0, 0, 0, 800)
+    page.CanvasSize = UDim2.new(0, 0, 0, 1000)
     page.ScrollBarThickness = 4
     page.ZIndex = 1000
     page.Parent = contentFrame
@@ -375,13 +375,13 @@ addToggle(pageMovement, "Infinite Jump", function(state) infJumpActive = state e
 addToggle(pageVisuals, "Master ESP (Highlight)", function(state) espActive = state end)
 
 -- TELEPORT SECTION
--- 1. Escape Prison Butonu (X: 1207.3, Y: 131.8, Z: -683.2)
+-- 1. Escape Prison Butonu
 local escapeBtn = Instance.new("TextButton")
-escapeBtn.Size = UDim2.new(0, 410, 0, 45)
+escapeBtn.Size = UDim2.new(0, 410, 0, 40)
 escapeBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 0)
 escapeBtn.BorderSizePixel = 0
 escapeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-escapeBtn.TextSize = 13
+escapeBtn.TextSize = 12
 escapeBtn.Font = Enum.Font.GothamBold
 escapeBtn.Text = "Escape Prison"
 escapeBtn.ZIndex = 1000
@@ -397,13 +397,13 @@ escapeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- 2. TP Nuke Butonu (X: 1472.7, Y: 175.9, Z: -1231.7)
+-- 2. TP Nuke Butonu
 local nukeBtn = Instance.new("TextButton")
-nukeBtn.Size = UDim2.new(0, 410, 0, 45)
+nukeBtn.Size = UDim2.new(0, 410, 0, 40)
 nukeBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
 nukeBtn.BorderSizePixel = 0
 nukeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-nukeBtn.TextSize = 13
+nukeBtn.TextSize = 12
 nukeBtn.Font = Enum.Font.GothamBold
 nukeBtn.Text = "TP Nuke"
 nukeBtn.ZIndex = 1000
@@ -419,36 +419,70 @@ nukeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- 3. Teleport to Random Player
-local tpBtn = Instance.new("TextButton")
-tpBtn.Size = UDim2.new(0, 410, 0, 40)
-tpBtn.BackgroundColor3 = Color3.fromRGB(0, 90, 160)
-tpBtn.BorderSizePixel = 0
-tpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-tpBtn.TextSize = 12
-tpBtn.Font = Enum.Font.GothamBold
-tpBtn.Text = "Teleport to Random Player"
-tpBtn.ZIndex = 1000
-tpBtn.Parent = pageTeleport
-Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0, 6)
+-- 3. OYUNCU SEÇEREK IŞINLANMA (Player List Container)
+local playerListLabel = Instance.new("TextLabel")
+playerListLabel.Size = UDim2.new(0, 410, 0, 25)
+playerListLabel.BackgroundTransparency = 1
+playerListLabel.Text = "--- Select Player to Teleport ---"
+playerListLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
+playerListLabel.TextSize = 12
+playerListLabel.Font = Enum.Font.GothamBold
+playerListLabel.ZIndex = 1000
+playerListLabel.Parent = pageTeleport
 
-tpBtn.MouseButton1Click:Connect(function()
-    pcall(function()
-        local targets = {}
-        for _, v in pairs(Players:GetPlayers()) do
-            if v ~= localPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                table.insert(targets, v)
-            end
+local playerScrollFrame = Instance.new("ScrollingFrame")
+playerScrollFrame.Size = UDim2.new(0, 410, 0, 160)
+playerScrollFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
+playerScrollFrame.BorderSizePixel = 0
+playerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+playerScrollFrame.ScrollBarThickness = 4
+playerScrollFrame.ZIndex = 1000
+playerScrollFrame.Parent = pageTeleport
+Instance.new("UICorner", playerScrollFrame).CornerRadius = UDim.new(0, 6)
+
+local playerListLayout = Instance.new("UIListLayout")
+playerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+playerListLayout.Padding = UDim.new(0, 5)
+playerListLayout.Parent = playerScrollFrame
+
+-- Oyuncu Listesini Dinamik Dolduran Fonksiyon
+local function refreshPlayerList()
+    for _, v in pairs(playerScrollFrame:GetChildren()) do
+        if v:IsA("TextButton") then v:Destroy() end
+    end
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= localPlayer then
+            local pBtn = Instance.new("TextButton")
+            pBtn.Size = UDim2.new(1, -10, 0, 35)
+            pBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            pBtn.BorderSizePixel = 0
+            pBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            pBtn.TextSize = 11
+            pBtn.Font = Enum.Font.GothamMedium
+            pBtn.Text = player.Name .. " (" .. player.DisplayName .. ")"
+            pBtn.ZIndex = 1000
+            pBtn.Parent = playerScrollFrame
+            Instance.new("UICorner", pBtn).CornerRadius = UDim.new(0, 4)
+
+            pBtn.MouseButton1Click:Connect(function()
+                pcall(function()
+                    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                        local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+                        if myRoot then
+                            myRoot.CFrame = player.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+                        end
+                    end
+                end)
+            end)
         end
-        if #targets > 0 then
-            local rnd = targets[math.random(1, #targets)]
-            local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if myRoot then
-                myRoot.CFrame = rnd.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
-            end
-        end
-    end)
-end)
+    end
+    playerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, playerListLayout.AbsoluteContentSize.Y + 10)
+end
+
+Players.PlayerAdded:Connect(refreshPlayerList)
+Players.PlayerRemoving:Connect(refreshPlayerList)
+task.spawn(refreshPlayerList)
 
 -- Farklı Takım Renkleri ESP Fonksiyonu
 local function getTeamColor(player)
@@ -488,7 +522,6 @@ RunService.Stepped:Connect(function()
         end
     end
 end)
-
 -- ESP Loop
 RunService.RenderStepped:Connect(function()
     for _, player in pairs(Players:GetPlayers()) do
@@ -512,7 +545,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Fly, Speed & Doğrudan Çalışan Güvenli Aimbot
+-- Fly, Speed & Aimbot Motoru
 local bv, bg
 RunService.RenderStepped:Connect(function()
     local char = localPlayer.Character
@@ -555,7 +588,8 @@ RunService.RenderStepped:Connect(function()
         if bv then bv:Destroy() bv = nil end
         if bg then bg:Destroy() bg = nil end
     end
- if aimbotActive then
+
+    if aimbotActive then
         local target = nil
         local minDist = math.huge
         local center = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
