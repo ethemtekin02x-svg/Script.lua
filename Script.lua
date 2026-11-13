@@ -375,7 +375,6 @@ addToggle(pageMovement, "Infinite Jump", function(state) infJumpActive = state e
 addToggle(pageVisuals, "Master ESP (Highlight)", function(state) espActive = state end)
 
 -- TELEPORT SECTION
--- 1. Escape Prison Butonu (X: 1207.3, Y: 131.8, Z: -683.2)
 local escapeBtn = Instance.new("TextButton")
 escapeBtn.Size = UDim2.new(0, 410, 0, 45)
 escapeBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 0)
@@ -397,7 +396,6 @@ escapeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- 2. Teleport to Random Player
 local tpBtn = Instance.new("TextButton")
 tpBtn.Size = UDim2.new(0, 410, 0, 40)
 tpBtn.BackgroundColor3 = Color3.fromRGB(0, 90, 160)
@@ -490,7 +488,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Fly, Speed & Gelişmiş Takım Filtreli Aimbot
+-- Fly, Speed & Dengeli Aimbot
 local bv, bg
 RunService.RenderStepped:Connect(function()
     local char = localPlayer.Character
@@ -540,12 +538,10 @@ if aimbotActive then
 
         for _, player in pairs(Players:GetPlayers()) do
             if player ~= localPlayer then
-                -- Gelişmiş Katı Takım Kontrolü (Kendi takımına asla nişan almaz)
+                -- Dengeli Takım Kontrolü (Sadece kesin aynı takımda olanları eler, diğerlerine kilitlenir)
                 local isTeamMate = false
-                if teamCheckActive then
-                    if player.Team and localPlayer.Team and player.Team == localPlayer.Team then
-                        isTeamMate = true
-                    elseif player.TeamColor and localPlayer.TeamColor and player.TeamColor == localPlayer.TeamColor then
+                if teamCheckActive and player.Team and localPlayer.Team then
+                    if player.Team == localPlayer.Team then
                         isTeamMate = true
                     end
                 end
