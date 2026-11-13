@@ -25,13 +25,13 @@ local isMenuLocked = false
 -- 1. TOGGLE BUTTON (MOD Butonu)
 local toggleBtn = Instance.new("TextButton")
 toggleBtn.Name = "ToggleMenuBtn"
-toggleBtn.Size = UDim2.new(0, 50, 0, 50)
-toggleBtn.Position = UDim2.new(0, 20, 0.5, -25)
+toggleBtn.Size = UDim2.new(0, 45, 0, 45)
+toggleBtn.Position = UDim2.new(0, 20, 0.5, -22)
 toggleBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 toggleBtn.BorderColor3 = Color3.fromRGB(0, 230, 118)
 toggleBtn.BorderSizePixel = 2
 toggleBtn.TextColor3 = Color3.fromRGB(0, 230, 118)
-toggleBtn.TextSize = 13
+toggleBtn.TextSize = 12
 toggleBtn.Font = Enum.Font.GothamBold
 toggleBtn.Text = "MOD"
 toggleBtn.ZIndex = 1000
@@ -41,11 +41,11 @@ local cornerToggle = Instance.new("UICorner")
 cornerToggle.CornerRadius = UDim.new(0, 8)
 cornerToggle.Parent = toggleBtn
 
--- 2. MAIN MENU
+-- 2. MAIN MENU (Küçültülmüş Kompakt Boyut)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 620, 0, 440)
-mainFrame.Position = UDim2.new(0.5, -310, 0.5, -220)
+mainFrame.Size = UDim2.new(0, 520, 0, 360)
+mainFrame.Position = UDim2.new(0.5, -260, 0.5, -180)
 mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 mainFrame.BorderColor3 = Color3.fromRGB(40, 40, 50)
 mainFrame.BorderSizePixel = 2
@@ -101,14 +101,14 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Title Bar
+-- Title Bar (Made by blackhat İmzalı)
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, 0, 0, 40)
+titleLabel.Size = UDim2.new(1, 0, 0, 35)
 titleLabel.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
 titleLabel.BorderSizePixel = 0
-titleLabel.Text = "   SCP: ANOMALY SITE | MOD MENU"
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.TextSize = 13
+titleLabel.Text = "   SCP: ANOMALY SITE | Made by blackhat"
+titleLabel.TextColor3 = Color3.fromRGB(0, 230, 118)
+titleLabel.TextSize = 12
 titleLabel.Font = Enum.Font.GothamBold
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.ZIndex = 1000
@@ -116,8 +116,8 @@ titleLabel.Parent = mainFrame
 
 -- Tabs List
 local tabListFrame = Instance.new("ScrollingFrame")
-tabListFrame.Size = UDim2.new(0, 160, 1, -40)
-tabListFrame.Position = UDim2.new(0, 0, 0, 40)
+tabListFrame.Size = UDim2.new(0, 140, 1, -35)
+tabListFrame.Position = UDim2.new(0, 0, 0, 35)
 tabListFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
 tabListFrame.BorderSizePixel = 0
 tabListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -130,8 +130,8 @@ tabLayout.Parent = tabListFrame
 
 -- Content Frame
 local contentFrame = Instance.new("Frame")
-contentFrame.Size = UDim2.new(1, -160, 1, -40)
-contentFrame.Position = UDim2.new(0, 160, 0, 40)
+contentFrame.Size = UDim2.new(1, -140, 1, -35)
+contentFrame.Position = UDim2.new(0, 140, 0, 35)
 contentFrame.BackgroundTransparency = 1
 contentFrame.ZIndex = 1000
 contentFrame.Parent = mainFrame
@@ -141,11 +141,11 @@ local tabButtons = {}
 
 local function createTab(name)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 50)
+    btn.Size = UDim2.new(1, 0, 0, 40)
     btn.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
     btn.BorderSizePixel = 0
     btn.TextColor3 = Color3.fromRGB(160, 160, 170)
-    btn.TextSize = 12
+    btn.TextSize = 11
     btn.Font = Enum.Font.GothamBold
     btn.Text = name
     btn.ZIndex = 1000
@@ -157,19 +157,19 @@ local function createTab(name)
     page.Size = UDim2.new(1, 0, 1, 0)
     page.BackgroundTransparency = 1
     page.Visible = false
-    page.CanvasSize = UDim2.new(0, 0, 0, 1000)
+    page.CanvasSize = UDim2.new(0, 0, 0, 900)
     page.ScrollBarThickness = 4
     page.ZIndex = 1000
     page.Parent = contentFrame
 
     local pLayout = Instance.new("UIListLayout")
     pLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    pLayout.Padding = UDim.new(0, 12)
+    pLayout.Padding = UDim.new(0, 10)
     pLayout.Parent = page
 
     local pPadding = Instance.new("UIPadding")
-    pPadding.PaddingTop = UDim.new(0, 15)
-    pPadding.PaddingLeft = UDim.new(0, 20)
+    pPadding.PaddingTop = UDim.new(0, 12)
+    pPadding.PaddingLeft = UDim.new(0, 15)
     pPadding.Parent = page
 
     btn.MouseButton1Click:Connect(function()
@@ -195,11 +195,11 @@ local pageTeleport = createTab("Teleport")
 -- Toggle Helper
 local function addToggle(parent, text, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 410, 0, 40)
+    btn.Size = UDim2.new(0, 345, 0, 35)
     btn.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
     btn.BorderSizePixel = 0
     btn.TextColor3 = Color3.fromRGB(220, 220, 225)
-    btn.TextSize = 12
+    btn.TextSize = 11
     btn.Font = Enum.Font.GothamMedium
     btn.Text = text .. " [ OFF ]"
     btn.ZIndex = 1000
@@ -242,13 +242,13 @@ addToggle(pageMovement, "Speed Hack", function(state) speedActive = state end)
 
 -- Speed Slider (1 - 255)
 local speedSliderFrame = Instance.new("Frame")
-speedSliderFrame.Size = UDim2.new(0, 410, 0, 50)
+speedSliderFrame.Size = UDim2.new(0, 345, 0, 45)
 speedSliderFrame.BackgroundTransparency = 1
 speedSliderFrame.ZIndex = 1000
 speedSliderFrame.Parent = pageMovement
 
 local speedLabel = Instance.new("TextLabel")
-speedLabel.Size = UDim2.new(1, 0, 0, 20)
+speedLabel.Size = UDim2.new(1, 0, 0, 18)
 speedLabel.BackgroundTransparency = 1
 speedLabel.Text = "Speed Value: 16 (Max: 255)"
 speedLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
@@ -259,8 +259,8 @@ speedLabel.ZIndex = 1000
 speedLabel.Parent = speedSliderFrame
 
 local speedTrack = Instance.new("Frame")
-speedTrack.Size = UDim2.new(1, 0, 0, 6)
-speedTrack.Position = UDim2.new(0, 0, 0, 30)
+speedTrack.Size = UDim2.new(1, 0, 0, 5)
+speedTrack.Position = UDim2.new(0, 0, 0, 26)
 speedTrack.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
 speedTrack.BorderSizePixel = 0
 speedTrack.ZIndex = 1000
@@ -276,8 +276,8 @@ speedFill.Parent = speedTrack
 Instance.new("UICorner", speedFill).CornerRadius = UDim.new(1, 0)
 
 local speedBtn = Instance.new("TextButton")
-speedBtn.Size = UDim2.new(0, 18, 0, 18)
-speedBtn.Position = UDim2.new(16/255, -9, 0, -6)
+speedBtn.Size = UDim2.new(0, 16, 0, 16)
+speedBtn.Position = UDim2.new(16/255, -8, 0, -5.5)
 speedBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 speedBtn.Text = ""
 speedBtn.ZIndex = 1000
@@ -298,7 +298,7 @@ UserInputService.InputChanged:Connect(function(input)
         local absSize = speedTrack.AbsoluteSize.X
         local rel = math.clamp((pos - absPos) / absSize, 0, 1)
         speedFill.Size = UDim2.new(rel, 0, 1, 0)
-        speedBtn.Position = UDim2.new(rel, -9, 0, -6)
+        speedBtn.Position = UDim2.new(rel, -8, 0, -5.5)
         speedVal = math.floor(rel * 254 + 1)
         speedLabel.Text = "Speed Value: " .. speedVal .. " (Max: 255)"
     end
@@ -308,13 +308,13 @@ addToggle(pageMovement, "Fly (Flight)", function(state) flyActive = state end)
 
 -- Fly Speed Slider (1 - 200)
 local flySliderFrame = Instance.new("Frame")
-flySliderFrame.Size = UDim2.new(0, 410, 0, 50)
+flySliderFrame.Size = UDim2.new(0, 345, 0, 45)
 flySliderFrame.BackgroundTransparency = 1
 flySliderFrame.ZIndex = 1000
 flySliderFrame.Parent = pageMovement
 
 local flyLabel = Instance.new("TextLabel")
-flyLabel.Size = UDim2.new(1, 0, 0, 20)
+flyLabel.Size = UDim2.new(1, 0, 0, 18)
 flyLabel.BackgroundTransparency = 1
 flyLabel.Text = "Fly Speed: 50 (Max: 200)"
 flyLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
@@ -325,8 +325,8 @@ flyLabel.ZIndex = 1000
 flyLabel.Parent = flySliderFrame
 
 local flyTrack = Instance.new("Frame")
-flyTrack.Size = UDim2.new(1, 0, 0, 6)
-flyTrack.Position = UDim2.new(0, 0, 0, 30)
+flyTrack.Size = UDim2.new(1, 0, 0, 5)
+flyTrack.Position = UDim2.new(0, 0, 0, 26)
 flyTrack.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
 flyTrack.BorderSizePixel = 0
 flyTrack.ZIndex = 1000
@@ -342,8 +342,8 @@ flyFill.Parent = flyTrack
 Instance.new("UICorner", flyFill).CornerRadius = UDim.new(1, 0)
 
 local flyBtn = Instance.new("TextButton")
-flyBtn.Size = UDim2.new(0, 18, 0, 18)
-flyBtn.Position = UDim2.new(50/200, -9, 0, -6)
+flyBtn.Size = UDim2.new(0, 16, 0, 16)
+flyBtn.Position = UDim2.new(50/200, -8, 0, -5.5)
 flyBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 flyBtn.Text = ""
 flyBtn.ZIndex = 1000
@@ -364,7 +364,7 @@ UserInputService.InputChanged:Connect(function(input)
         local absSize = flyTrack.AbsoluteSize.X
         local rel = math.clamp((pos - absPos) / absSize, 0, 1)
         flyFill.Size = UDim2.new(rel, 0, 1, 0)
-        flyBtn.Position = UDim2.new(rel, -9, 0, -6)
+        flyBtn.Position = UDim2.new(rel, -8, 0, -5.5)
         flySpeedVal = math.floor(rel * 190 + 10)
         flyLabel.Text = "Fly Speed: " .. flySpeedVal .. " (Max: 200)"
     end
@@ -375,13 +375,12 @@ addToggle(pageMovement, "Infinite Jump", function(state) infJumpActive = state e
 addToggle(pageVisuals, "Master ESP (Highlight)", function(state) espActive = state end)
 
 -- TELEPORT SECTION
--- 1. Escape Prison Butonu
 local escapeBtn = Instance.new("TextButton")
-escapeBtn.Size = UDim2.new(0, 410, 0, 40)
+escapeBtn.Size = UDim2.new(0, 345, 0, 35)
 escapeBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 0)
 escapeBtn.BorderSizePixel = 0
 escapeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-escapeBtn.TextSize = 12
+escapeBtn.TextSize = 11
 escapeBtn.Font = Enum.Font.GothamBold
 escapeBtn.Text = "Escape Prison"
 escapeBtn.ZIndex = 1000
@@ -397,13 +396,12 @@ escapeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- 2. TP Nuke Butonu
 local nukeBtn = Instance.new("TextButton")
-nukeBtn.Size = UDim2.new(0, 410, 0, 40)
+nukeBtn.Size = UDim2.new(0, 345, 0, 35)
 nukeBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
 nukeBtn.BorderSizePixel = 0
 nukeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-nukeBtn.TextSize = 12
+nukeBtn.TextSize = 11
 nukeBtn.Font = Enum.Font.GothamBold
 nukeBtn.Text = "TP Nuke"
 nukeBtn.ZIndex = 1000
@@ -419,19 +417,19 @@ nukeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- 3. OYUNCU SEÇEREK IŞINLANMA (Player List Container)
+-- OYUNCU SEÇEREK IŞINLANMA (Player List)
 local playerListLabel = Instance.new("TextLabel")
-playerListLabel.Size = UDim2.new(0, 410, 0, 25)
+playerListLabel.Size = UDim2.new(0, 345, 0, 20)
 playerListLabel.BackgroundTransparency = 1
 playerListLabel.Text = "--- Select Player to Teleport ---"
 playerListLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
-playerListLabel.TextSize = 12
+playerListLabel.TextSize = 11
 playerListLabel.Font = Enum.Font.GothamBold
 playerListLabel.ZIndex = 1000
 playerListLabel.Parent = pageTeleport
 
 local playerScrollFrame = Instance.new("ScrollingFrame")
-playerScrollFrame.Size = UDim2.new(0, 410, 0, 160)
+playerScrollFrame.Size = UDim2.new(0, 345, 0, 130)
 playerScrollFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
 playerScrollFrame.BorderSizePixel = 0
 playerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -445,7 +443,6 @@ playerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 playerListLayout.Padding = UDim.new(0, 5)
 playerListLayout.Parent = playerScrollFrame
 
--- Oyuncu Listesini Dinamik Dolduran Fonksiyon
 local function refreshPlayerList()
     for _, v in pairs(playerScrollFrame:GetChildren()) do
         if v:IsA("TextButton") then v:Destroy() end
@@ -454,7 +451,7 @@ local function refreshPlayerList()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= localPlayer then
             local pBtn = Instance.new("TextButton")
-            pBtn.Size = UDim2.new(1, -10, 0, 35)
+            pBtn.Size = UDim2.new(1, -10, 0, 32)
             pBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
             pBtn.BorderSizePixel = 0
             pBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -522,6 +519,7 @@ RunService.Stepped:Connect(function()
         end
     end
 end)
+
 -- ESP Loop
 RunService.RenderStepped:Connect(function()
     for _, player in pairs(Players:GetPlayers()) do
@@ -544,7 +542,6 @@ RunService.RenderStepped:Connect(function()
         end
     end
 end)
-
 -- Fly, Speed & Aimbot Motoru
 local bv, bg
 RunService.RenderStepped:Connect(function()
