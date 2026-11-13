@@ -488,7 +488,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Fly, Speed & Dengeli Aimbot
+-- Fly, Speed & Hasar Alabilen Düşman Odaklı Aimbot
 local bv, bg
 RunService.RenderStepped:Connect(function()
     local char = localPlayer.Character
@@ -537,18 +537,25 @@ if aimbotActive then
         local center = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
 
         for _, player in pairs(Players:GetPlayers()) do
-            if player ~= localPlayer then
-                -- Dengeli Takım Kontrolü (Sadece kesin aynı takımda olanları eler, diğerlerine kilitlenir)
-                local isTeamMate = false
-                if teamCheckActive and player.Team and localPlayer.Team then
-                    if player.Team == localPlayer.Team then
-                        isTeamMate = true
+            if player ~= localPlayer and player.Character then
+                local pChar = player.Character
+                local pHum = pChar:FindFirstChildOfClass("Humanoid")
+                local pHead = pChar:FindFirstChild("Head")
+
+                -- 1. Hasar Verilebilirlik ve Canlılık Kontrolü (Ölüleri ve canı olmayanları ele)
+                local canDamage = pHum and pHum.Health > 0
+
+                -- 2. Takım Kontrolü (Team Check)
+                if canDamage and teamCheckActive then
+                    if localPlayer.Team and player.Team and localPlayer.Team == player.Team then
+                        canDamage = false
+                    elseif localPlayer.TeamColor and player.TeamColor and localPlayer.TeamColor == player.TeamColor then
+                        canDamage = false
                     end
                 end
 
-                if not isTeamMate and player.Character and player.Character:FindFirstChild("Head") then
-                    local head = player.Character.Head
-                    local pos, onScreen = camera:WorldToViewportPoint(head.Position)
+                if canDamage and pHead then
+                    local pos, onScreen = camera:WorldToViewportPoint(pHead.Position)
                     if onScreen then
                         local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
                         if dist < minDist then
@@ -557,14 +564,14 @@ if aimbotActive then
                                 local rayParams = RaycastParams.new()
                                 rayParams.FilterType = Enum.RaycastFilterType.Exclude
                                 rayParams.FilterDescendantsInstances = {char, camera}
-                                local res = workspace:Raycast(camera.CFrame.Position, head.Position - camera.CFrame.Position, rayParams)
-                                if res and not res.Instance:IsDescendantOf(player.Character) then
+                                local res = workspace:Raycast(camera.CFrame.Position, pHead.Position - camera.CFrame.Position, rayParams)
+                                if res and not res.Instance:IsDescendantOf(pChar) then
                                     canSee = false
                                 end
                             end
                             if canSee then
                                 minDist = dist
-                                target = head
+                                target = pHead
                             end
                         end
                     end
