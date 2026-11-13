@@ -1,519 +1,551 @@
-# local Player = game.Players.LocalPlayer
-local PlayerGui = Player:WaitForChild("PlayerGui")
-local UIS = game:GetService("UserInputService")
-local RS = game:GetService("RunService")
-local WS = workspace
-local Cam = WS.CurrentCamera
-local Lighting = game:GetService("Lighting")
+-- Services
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = PlayerGui
-ScreenGui.Name = "Vex"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.IgnoreGuiInset = true
+local localPlayer = Players.LocalPlayer
+local camera = workspace.CurrentCamera
 
-local Toggle = Instance.new("TextButton")
-Toggle.Parent = ScreenGui
-Toggle.Size = UDim2.new(0, 50, 0, 50)
-Toggle.Position = UDim2.new(1, -60, 0, 20)
-Toggle.Text = "VM"
-Toggle.BackgroundColor3 = Color3.new(0.08, 0.08, 0.1)
-Toggle.TextColor3 = Color3.new(0, 1, 0.7)
-Toggle.Font = Enum.Font.SourceSansBold
-Toggle.TextSize = 18
-Toggle.ZIndex = 99
-Toggle.BorderSizePixel = 0
-Toggle.AutoButtonColor = false
-Instance.new("UICorner", Toggle).CornerRadius = UDim.new(0, 12)
-Instance.new("UIStroke", Toggle).Color = Color3.new(0, 1, 0.7)
+-- ScreenGui (En Üst Katman - Marketlerin Asla Altında Kalmaz)
+local targetParent = localPlayer:WaitForChild("PlayerGui")
+local existingGui = targetParent:FindFirstChild("UltimateCleanModMenu") or CoreGui:FindFirstChild("UltimateCleanModMenu")
+if existingGui then existingGui:Destroy() end
 
-local Menu = Instance.new("Frame")
-Menu.Parent = ScreenGui
-Menu.Size = UDim2.new(0, 260, 0, 360)
-Menu.Position = UDim2.new(0.5, -130, 0.5, -180)
-Menu.BackgroundColor3 = Color3.new(0.06, 0.06, 0.08)
-Menu.Visible = false
-Menu.ZIndex = 98
-Menu.BorderSizePixel = 0
-Menu.Active = true
-Menu.ClipsDescendants = true
-Instance.new("UICorner", Menu).CornerRadius = UDim.new(0, 12)
-Instance.new("UIStroke", Menu).Color = Color3.new(0, 1, 0.7)
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "UltimateCleanModMenu"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.DisplayOrder = 2147483647
+screenGui.Parent = targetParent
 
-local TopBar = Instance.new("Frame", Menu)
-TopBar.Size = UDim2.new(1, 0, 0, 32)
-TopBar.BackgroundColor3 = Color3.new(0.1, 0.1, 0.12)
-TopBar.BorderSizePixel = 0
-Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 12)
+local isMenuLocked = false
 
-local Title = Instance.new("TextLabel", TopBar)
-Title.Size = UDim2.new(1, -40, 1, 0)
-Title.Position = UDim2.new(0, 12, 0, 0)
-Title.Text = "By Vex_Mods"
-Title.BackgroundTransparency = 1
-Title.TextColor3 = Color3.new(0, 1, 0.7)
-Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 16
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.ZIndex = 102
+-- 1. TOGGLE BUTTON (MOD Butonu)
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Name = "ToggleMenuBtn"
+toggleBtn.Size = UDim2.new(0, 50, 0, 50)
+toggleBtn.Position = UDim2.new(0, 20, 0.5, -25)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+toggleBtn.BorderColor3 = Color3.fromRGB(0, 230, 118)
+toggleBtn.BorderSizePixel = 2
+toggleBtn.TextColor3 = Color3.fromRGB(0, 230, 118)
+toggleBtn.TextSize = 13
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.Text = "MOD"
+toggleBtn.ZIndex = 1000
+toggleBtn.Parent = screenGui
 
-local Close = Instance.new("TextButton", TopBar)
-Close.Size = UDim2.new(0, 24, 0, 24)
-Close.Position = UDim2.new(1, -30, 0, 4)
-Close.Text = "X"
-Close.BackgroundColor3 = Color3.new(0.9, 0.2, 0.2)
-Close.TextColor3 = Color3.new(1, 1, 1)
-Close.Font = Enum.Font.SourceSansBold
-Close.TextSize = 12
-Close.BorderSizePixel = 0
-Close.AutoButtonColor = false
-Close.ZIndex = 103
-Instance.new("UICorner", Close).CornerRadius = UDim.new(0, 6)
+local cornerToggle = Instance.new("UICorner")
+cornerToggle.CornerRadius = UDim.new(0, 8)
+cornerToggle.Parent = toggleBtn
 
-local TabFrame = Instance.new("Frame", Menu)
-TabFrame.Size = UDim2.new(1, 0, 0, 30)
-TabFrame.Position = UDim2.new(0, 0, 0, 34)
-TabFrame.BackgroundColor3 = Color3.new(0.08, 0.08, 0.1)
-TabFrame.BorderSizePixel = 0
+-- 2. MAIN MENU
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 620, 0, 440)
+mainFrame.Position = UDim2.new(0.5, -310, 0.5, -220)
+mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+mainFrame.BorderColor3 = Color3.fromRGB(40, 40, 50)
+mainFrame.BorderSizePixel = 2
+mainFrame.Visible = true
+mainFrame.ZIndex = 999
+mainFrame.Parent = screenGui
 
-local Tab1 = Instance.new("TextButton", TabFrame)
-Tab1.Size = UDim2.new(0.33, -2, 1, 0)
-Tab1.Text = "Ana"
-Tab1.BackgroundColor3 = Color3.new(0, 0.7, 0.6)
-Tab1.TextColor3 = Color3.new(1, 1, 1)
-Tab1.Font = Enum.Font.SourceSansBold
-Tab1.TextSize = 12
-Tab1.BorderSizePixel = 0
-Tab1.AutoButtonColor = false
+local cornerMain = Instance.new("UICorner")
+cornerMain.CornerRadius = UDim.new(0, 10)
+cornerMain.Parent = mainFrame
 
-local Tab2 = Instance.new("TextButton", TabFrame)
-Tab2.Size = UDim2.new(0.33, -2, 1, 0)
-Tab2.Position = UDim2.new(0.33, 3, 0, 0)
-Tab2.Text = "ESP"
-Tab2.BackgroundColor3 = Color3.new(0.12, 0.12, 0.14)
-Tab2.TextColor3 = Color3.new(0.5, 0.5, 0.5)
-Tab2.Font = Enum.Font.SourceSansBold
-Tab2.TextSize = 12
-Tab2.BorderSizePixel = 0
-Tab2.AutoButtonColor = false
-
-local Tab3 = Instance.new("TextButton", TabFrame)
-Tab3.Size = UDim2.new(0.34, -2, 1, 0)
-Tab3.Position = UDim2.new(0.66, 3, 0, 0)
-Tab3.Text = "Fun"
-Tab3.BackgroundColor3 = Color3.new(0.12, 0.12, 0.14)
-Tab3.TextColor3 = Color3.new(0.5, 0.5, 0.5)
-Tab3.Font = Enum.Font.SourceSansBold
-Tab3.TextSize = 12
-Tab3.BorderSizePixel = 0
-Tab3.AutoButtonColor = false
-
-local Page1 = Instance.new("ScrollingFrame", Menu)
-Page1.Size = UDim2.new(1, -4, 1, -70)
-Page1.Position = UDim2.new(0, 2, 0, 66)
-Page1.BackgroundTransparency = 1
-Page1.CanvasSize = UDim2.new(0, 0, 0, 500)
-Page1.ScrollBarThickness = 4
-Page1.ScrollBarImageColor3 = Color3.new(0, 0.7, 0.6)
-Page1.BorderSizePixel = 0
-Page1.ZIndex = 100
-Page1.ScrollingEnabled = true
-Page1.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
-Page1.ElasticBehavior = Enum.ElasticBehavior.WhenScrollable
-Page1.ScrollingDirection = Enum.ScrollingDirection.Y
-Page1.ClipsDescendants = true
-
-local Page2 = Instance.new("ScrollingFrame", Menu)
-Page2.Size = UDim2.new(1, -4, 1, -70)
-Page2.Position = UDim2.new(0, 2, 0, 66)
-Page2.BackgroundTransparency = 1
-Page2.CanvasSize = UDim2.new(0, 0, 0, 400)
-Page2.ScrollBarThickness = 4
-Page2.ScrollBarImageColor3 = Color3.new(0, 0.7, 0.6)
-Page2.BorderSizePixel = 0
-Page2.Visible = false
-Page2.ZIndex = 100
-Page2.ScrollingEnabled = true
-Page2.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
-Page2.ElasticBehavior = Enum.ElasticBehavior.WhenScrollable
-Page2.ScrollingDirection = Enum.ScrollingDirection.Y
-Page2.ClipsDescendants = true
-
-local Page3 = Instance.new("ScrollingFrame", Menu)
-Page3.Size = UDim2.new(1, -4, 1, -70)
-Page3.Position = UDim2.new(0, 2, 0, 66)
-Page3.BackgroundTransparency = 1
-Page3.CanvasSize = UDim2.new(0, 0, 0, 300)
-Page3.ScrollBarThickness = 4
-Page3.ScrollBarImageColor3 = Color3.new(0, 0.7, 0.6)
-Page3.BorderSizePixel = 0
-Page3.Visible = false
-Page3.ZIndex = 100
-Page3.ScrollingEnabled = true
-Page3.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
-Page3.ElasticBehavior = Enum.ElasticBehavior.WhenScrollable
-Page3.ScrollingDirection = Enum.ScrollingDirection.Y
-Page3.ClipsDescendants = true
-
-local Layout1 = Instance.new("UIListLayout", Page1); Layout1.Padding = UDim.new(0, 6); Layout1.HorizontalAlignment = Enum.HorizontalAlignment.Center; Layout1.SortOrder = Enum.SortOrder.LayoutOrder
-local Layout2 = Instance.new("UIListLayout", Page2); Layout2.Padding = UDim.new(0, 6); Layout2.HorizontalAlignment = Enum.HorizontalAlignment.Center; Layout2.SortOrder = Enum.SortOrder.LayoutOrder
-local Layout3 = Instance.new("UIListLayout", Page3); Layout3.Padding = UDim.new(0, 6); Layout3.HorizontalAlignment = Enum.HorizontalAlignment.Center; Layout3.SortOrder = Enum.SortOrder.LayoutOrder
-
-Layout1:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    Page1.CanvasSize = UDim2.new(0, 0, 0, Layout1.AbsoluteContentSize.Y + 10)
-end)
-Layout2:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    Page2.CanvasSize = UDim2.new(0, 0, 0, Layout2.AbsoluteContentSize.Y + 10)
-end)
-Layout3:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    Page3.CanvasSize = UDim2.new(0, 0, 0, Layout3.AbsoluteContentSize.Y + 10)
-end)
-
-local function makeDraggable(gui)
-    local dragging, dragStart, startPos = false, nil, nil
-    gui.InputBegan:Connect(function(input)
+-- Sürüklenebilirlik
+local function makeDraggable(frame, handle)
+    handle = handle or frame
+    local dragging, dragInput, dragStart, startPos
+    
+    handle.InputBegan:Connect(function(input)
+        if isMenuLocked then return end
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
-            startPos = gui.Position
+            startPos = frame.Position
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then dragging = false end
             end)
         end
     end)
-    gui.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+
+    handle.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if not isMenuLocked and dragging and dragInput and (input == dragInput) then
             local delta = input.Position - dragStart
-            gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
 end
 
-makeDraggable(Toggle)
-makeDraggable(Menu)
+makeDraggable(toggleBtn)
+makeDraggable(mainFrame, mainFrame)
 
-Tab1.Activated:Connect(function()
-    Page1.Visible = true; Page2.Visible = false; Page3.Visible = false
-    Tab1.BackgroundColor3 = Color3.new(0, 0.7, 0.6); Tab1.TextColor3 = Color3.new(1, 1, 1)
-    Tab2.BackgroundColor3 = Color3.new(0.12, 0.12, 0.14); Tab2.TextColor3 = Color3.new(0.5, 0.5, 0.5)
-    Tab3.BackgroundColor3 = Color3.new(0.12, 0.12, 0.14); Tab3.TextColor3 = Color3.new(0.5, 0.5, 0.5)
-end)
-Tab2.Activated:Connect(function()
-    Page1.Visible = false; Page2.Visible = true; Page3.Visible = false
-    Tab1.BackgroundColor3 = Color3.new(0.12, 0.12, 0.14); Tab1.TextColor3 = Color3.new(0.5, 0.5, 0.5)
-    Tab2.BackgroundColor3 = Color3.new(0, 0.7, 0.6); Tab2.TextColor3 = Color3.new(1, 1, 1)
-    Tab3.BackgroundColor3 = Color3.new(0.12, 0.12, 0.14); Tab3.TextColor3 = Color3.new(0.5, 0.5, 0.5)
-end)
-Tab3.Activated:Connect(function()
-    Page1.Visible = false; Page2.Visible = false; Page3.Visible = true
-    Tab1.BackgroundColor3 = Color3.new(0.12, 0.12, 0.14); Tab1.TextColor3 = Color3.new(0.5, 0.5, 0.5)
-    Tab2.BackgroundColor3 = Color3.new(0.12, 0.12, 0.14); Tab2.TextColor3 = Color3.new(0.5, 0.5, 0.5)
-    Tab3.BackgroundColor3 = Color3.new(0, 0.7, 0.6); Tab3.TextColor3 = Color3.new(1, 1, 1)
+toggleBtn.MouseButton1Click:Connect(function()
+    mainFrame.Visible = not mainFrame.Visible
 end)
 
-local flySpeed = 50
-local walkSpeed = 16
-local jumpPower = 50
-local fov = 70
-local flying, noclip, esp, infJump, aimbot, spinbot, fullBright, lowGrav, hitbox, speedHack, jumpHack = false, false, false, false, false, false, false, false, false, false, false
-local defaultAmbient = Lighting.Ambient
-local defaultBrightness = Lighting.Brightness
-local defaultShadows = Lighting.GlobalShadows
-local defaultClock = Lighting.ClockTime
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and (input.KeyCode == Enum.KeyCode.Insert or input.KeyCode == Enum.KeyCode.F4) then
+        mainFrame.Visible = not mainFrame.Visible
+    end
+end)
 
-local function makeBtn(parent, text)
-    local btn = Instance.new("TextButton", parent)
-    btn.Size = UDim2.new(1, -10, 0, 30)
-    btn.Text = text
-    btn.BackgroundColor3 = Color3.new(0.14, 0.14, 0.16)
-    btn.TextColor3 = Color3.new(1, 0.3, 0.3)
-    btn.Font = Enum.Font.SourceSansBold
-    btn.TextSize = 12
+-- Title Bar
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 40)
+titleLabel.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
+titleLabel.BorderSizePixel = 0
+titleLabel.Text = "   SCP: ANOMALY SITE | MOD MENU"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextSize = 13
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.ZIndex = 1000
+titleLabel.Parent = mainFrame
+
+-- Tabs List
+local tabListFrame = Instance.new("ScrollingFrame")
+tabListFrame.Size = UDim2.new(0, 160, 1, -40)
+tabListFrame.Position = UDim2.new(0, 0, 0, 40)
+tabListFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
+tabListFrame.BorderSizePixel = 0
+tabListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+tabListFrame.ZIndex = 1000
+tabListFrame.Parent = mainFrame
+
+local tabLayout = Instance.new("UIListLayout")
+tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+tabLayout.Parent = tabListFrame
+
+-- Content Frame
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, -160, 1, -40)
+contentFrame.Position = UDim2.new(0, 160, 0, 40)
+contentFrame.BackgroundTransparency = 1
+contentFrame.ZIndex = 1000
+contentFrame.Parent = mainFrame
+
+local pages = {}
+local tabButtons = {}
+
+local function createTab(name)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 50)
+    btn.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
     btn.BorderSizePixel = 0
-    btn.AutoButtonColor = false
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
+    btn.TextColor3 = Color3.fromRGB(160, 160, 170)
+    btn.TextSize = 12
+    btn.Font = Enum.Font.GothamBold
+    btn.Text = name
+    btn.ZIndex = 1000
+    btn.Parent = tabListFrame
+
+    table.insert(tabButtons, btn)
+
+    local page = Instance.new("ScrollingFrame")
+    page.Size = UDim2.new(1, 0, 1, 0)
+    page.BackgroundTransparency = 1
+    page.Visible = false
+    page.CanvasSize = UDim2.new(0, 0, 0, 800)
+    page.ScrollBarThickness = 4
+    page.ZIndex = 1000
+    page.Parent = contentFrame
+
+    local pLayout = Instance.new("UIListLayout")
+    pLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    pLayout.Padding = UDim.new(0, 12)
+    pLayout.Parent = page
+
+    local pPadding = Instance.new("UIPadding")
+    pPadding.PaddingTop = UDim.new(0, 15)
+    pPadding.PaddingLeft = UDim.new(0, 20)
+    pPadding.Parent = page
+
+    btn.MouseButton1Click:Connect(function()
+        for _, p in pairs(pages) do p.Visible = false end
+        for _, b in pairs(tabButtons) do b.TextColor3 = Color3.fromRGB(160, 160, 170) end
+        page.Visible = true
+        btn.TextColor3 = Color3.fromRGB(0, 230, 118)
+    end)
+
+    if #pages == 0 then
+        page.Visible = true
+        btn.TextColor3 = Color3.fromRGB(0, 230, 118)
+    end
+    table.insert(pages, page)
+    return page
+end
+
+local pageCombat = createTab("Combat")
+local pageMovement = createTab("Movement")
+local pageVisuals = createTab("Visuals")
+local pageTeleport = createTab("Teleport")
+
+-- Toggle Helper
+local function addToggle(parent, text, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 410, 0, 40)
+    btn.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
+    btn.BorderSizePixel = 0
+    btn.TextColor3 = Color3.fromRGB(220, 220, 225)
+    btn.TextSize = 12
+    btn.Font = Enum.Font.GothamMedium
+    btn.Text = text .. " [ OFF ]"
+    btn.ZIndex = 1000
+    btn.Parent = parent
+
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+
+    local active = false
+    btn.MouseButton1Click:Connect(function()
+        active = not active
+        if active then
+            btn.BackgroundColor3 = Color3.fromRGB(0, 120, 60)
+            btn.Text = text .. " [ ON ]"
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
+            btn.Text = text .. " [ OFF ]"
+        end
+        callback(active)
+    end)
     return btn
 end
 
-local function makeBox(parent, text)
-    local box = Instance.new("TextBox", parent)
-    box.Size = UDim2.new(1, -10, 0, 28)
-    box.Text = text
-    box.BackgroundColor3 = Color3.new(0.14, 0.14, 0.16)
-    box.TextColor3 = Color3.new(0.8, 0.8, 0.8)
-    box.Font = Enum.Font.SourceSans
-    box.TextSize = 12
-    box.BorderSizePixel = 0
-    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 5)
-    Instance.new("UIStroke", box).Color = Color3.new(0, 0.7, 0.6)
-    return box
+-- Değişkenler
+local aimbotActive = false
+local wallCheckActive = true
+local teamCheckActive = true
+local speedActive = false
+local speedVal = 16
+local flyActive = false
+local flySpeedVal = 50
+local noclipActive = false
+local infJumpActive = false
+local espActive = false
+
+addToggle(pageCombat, "Aimbot (Auto-Lock)", function(state) aimbotActive = state end)
+addToggle(pageCombat, "Wall Check (No Wall Aim)", function(state) wallCheckActive = state end)
+addToggle(pageCombat, "Team Check (No Team Aim)", function(state) teamCheckActive = state end)
+
+addToggle(pageMovement, "Speed Hack", function(state) speedActive = state end)
+
+-- Speed Slider (1 - 255)
+local speedSliderFrame = Instance.new("Frame")
+speedSliderFrame.Size = UDim2.new(0, 410, 0, 50)
+speedSliderFrame.BackgroundTransparency = 1
+speedSliderFrame.ZIndex = 1000
+speedSliderFrame.Parent = pageMovement
+
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Size = UDim2.new(1, 0, 0, 20)
+speedLabel.BackgroundTransparency = 1
+speedLabel.Text = "Speed Value: 16 (Max: 255)"
+speedLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
+speedLabel.TextSize = 11
+speedLabel.Font = Enum.Font.GothamMedium
+speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+speedLabel.ZIndex = 1000
+speedLabel.Parent = speedSliderFrame
+
+local speedTrack = Instance.new("Frame")
+speedTrack.Size = UDim2.new(1, 0, 0, 6)
+speedTrack.Position = UDim2.new(0, 0, 0, 30)
+speedTrack.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+speedTrack.BorderSizePixel = 0
+speedTrack.ZIndex = 1000
+speedTrack.Parent = speedSliderFrame
+Instance.new("UICorner", speedTrack).CornerRadius = UDim.new(1, 0)
+
+local speedFill = Instance.new("Frame")
+speedFill.Size = UDim2.new(16/255, 0, 1, 0)
+speedFill.BackgroundColor3 = Color3.fromRGB(0, 230, 118)
+speedFill.BorderSizePixel = 0
+speedFill.ZIndex = 1000
+speedFill.Parent = speedTrack
+Instance.new("UICorner", speedFill).CornerRadius = UDim.new(1, 0)
+
+local speedBtn = Instance.new("TextButton")
+speedBtn.Size = UDim2.new(0, 18, 0, 18)
+speedBtn.Position = UDim2.new(16/255, -9, 0, -6)
+speedBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+speedBtn.Text = ""
+speedBtn.ZIndex = 1000
+speedBtn.Parent = speedTrack
+Instance.new("UICorner", speedBtn).CornerRadius = UDim.new(1, 0)
+
+local speedSliding = false
+speedBtn.MouseButton1Down:Connect(function() speedSliding = true end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        speedSliding = false
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if speedSliding and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local pos = input.Position.X
+        local absPos = speedTrack.AbsolutePosition.X
+        local absSize = speedTrack.AbsoluteSize.X
+        local rel = math.clamp((pos - absPos) / absSize, 0, 1)
+        speedFill.Size = UDim2.new(rel, 0, 1, 0)
+        speedBtn.Position = UDim2.new(rel, -9, 0, -6)
+        speedVal = math.floor(rel * 254 + 1)
+        speedLabel.Text = "Speed Value: " .. speedVal .. " (Max: 255)"
+    end
+end)
+
+addToggle(pageMovement, "Fly (Flight)", function(state) flyActive = state end)
+
+-- Fly Speed Slider (1 - 200)
+local flySliderFrame = Instance.new("Frame")
+flySliderFrame.Size = UDim2.new(0, 410, 0, 50)
+flySliderFrame.BackgroundTransparency = 1
+flySliderFrame.ZIndex = 1000
+flySliderFrame.Parent = pageMovement
+
+local flyLabel = Instance.new("TextLabel")
+flyLabel.Size = UDim2.new(1, 0, 0, 20)
+flyLabel.BackgroundTransparency = 1
+flyLabel.Text = "Fly Speed: 50 (Max: 200)"
+flyLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
+flyLabel.TextSize = 11
+flyLabel.Font = Enum.Font.GothamMedium
+flyLabel.TextXAlignment = Enum.TextXAlignment.Left
+flyLabel.ZIndex = 1000
+flyLabel.Parent = flySliderFrame
+
+local flyTrack = Instance.new("Frame")
+flyTrack.Size = UDim2.new(1, 0, 0, 6)
+flyTrack.Position = UDim2.new(0, 0, 0, 30)
+flyTrack.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+flyTrack.BorderSizePixel = 0
+flyTrack.ZIndex = 1000
+flyTrack.Parent = flySliderFrame
+Instance.new("UICorner", flyTrack).CornerRadius = UDim.new(1, 0)
+
+local flyFill = Instance.new("Frame")
+flyFill.Size = UDim2.new(50/200, 0, 1, 0)
+flyFill.BackgroundColor3 = Color3.fromRGB(0, 176, 255)
+flyFill.BorderSizePixel = 0
+flyFill.ZIndex = 1000
+flyFill.Parent = flyTrack
+Instance.new("UICorner", flyFill).CornerRadius = UDim.new(1, 0)
+
+local flyBtn = Instance.new("TextButton")
+flyBtn.Size = UDim2.new(0, 18, 0, 18)
+flyBtn.Position = UDim2.new(50/200, -9, 0, -6)
+flyBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+flyBtn.Text = ""
+flyBtn.ZIndex = 1000
+flyBtn.Parent = flyTrack
+Instance.new("UICorner", flyBtn).CornerRadius = UDim.new(1, 0)
+
+local flySliding = false
+flyBtn.MouseButton1Down:Connect(function() flySliding = true end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        flySliding = false
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if flySliding and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local pos = input.Position.X
+        local absPos = flyTrack.AbsolutePosition.X
+        local absSize = flyTrack.AbsoluteSize.X
+        local rel = math.clamp((pos - absPos) / absSize, 0, 1)
+        flyFill.Size = UDim2.new(rel, 0, 1, 0)
+        flyBtn.Position = UDim2.new(rel, -9, 0, -6)
+        flySpeedVal = math.floor(rel * 190 + 10)
+        flyLabel.Text = "Fly Speed: " .. flySpeedVal .. " (Max: 200)"
+    end
+end)
+
+addToggle(pageMovement, "Noclip", function(state) noclipActive = state end)
+addToggle(pageMovement, "Infinite Jump", function(state) infJumpActive = state end)
+addToggle(pageVisuals, "Master ESP (Highlight)", function(state) espActive = state end)
+
+-- TP to Random Player
+local tpBtn = Instance.new("TextButton")
+tpBtn.Size = UDim2.new(0, 410, 0, 40)
+tpBtn.BackgroundColor3 = Color3.fromRGB(0, 90, 160)
+tpBtn.BorderSizePixel = 0
+tpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+tpBtn.TextSize = 12
+tpBtn.Font = Enum.Font.GothamBold
+tpBtn.Text = "Teleport to Random Player"
+tpBtn.ZIndex = 1000
+tpBtn.Parent = pageTeleport
+Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0, 6)
+
+tpBtn.MouseButton1Click:Connect(default or function()
+    pcall(function()
+        local targets = {}
+        for _, v in pairs(Players:GetPlayers()) do
+            if v ~= localPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                table.insert(targets, v)
+            end
+        end
+        if #targets > 0 then
+            local rnd = targets[math.random(1, #targets)]
+            local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if myRoot then
+                myRoot.CFrame = rnd.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+            end
+        end
+    end)
+end)
+
+-- FARKLI TAKIM RENKLERİ ESP FONKSİYONU
+local function getTeamColor(player)
+    if player.Team then
+        local tName = player.Team.Name:lower()
+        if tName:find("d") or tName:find("sinif") or tName:find("class d") then
+            return Color3.fromRGB(255, 140, 0) -- Turuncu (Sınıf D)
+        elseif tName:find("bilim") or tName:find("scientist") then
+            return Color3.fromRGB(240, 240, 240) -- Beyaz (Bilim Adamı)
+        elseif tName:find("guvenlik") or tName:find("security") or tName:find("guard") then
+            return Color3.fromRGB(100, 100, 120) -- Gri/Mavi (Güvenlik)
+        elseif tName:find("mtf") or tName:find("mobile task") then
+            return Color3.fromRGB(0, 120, 255) -- Mavi (MTF)
+        elseif tName:find("yonetici") or tName:find("site director") or tName:find("admin") then
+            return Color3.fromRGB(200, 0, 200) -- Mor (Yönetici)
+        elseif tName:find("ci") or tName:find("chaos") then
+            return Color3.fromRGB(0, 180, 80) -- Yeşil (Chaos Insurgency)
+        else
+            return player.Team.Color.Color
+        end
+    end
+    return Color3.fromRGB(255, 50, 50) -- Varsayılan Düşman Kırmızı
 end
 
-local FlyBtn = makeBtn(Page1, "Fly [KAPALI]")
-local FlyBox = makeBox(Page1, "Fly Hizi: 50")
-local SpeedBtn = makeBtn(Page1, "Hiz Hack [KAPALI]")
-local SpeedBox = makeBox(Page1, "Hiz: 16")
-local JumpBtn = makeBtn(Page1, "Ziplama Hack [KAPALI]")
-local JumpBox = makeBox(Page1, "Ziplama: 50")
-local NoclipBtn = makeBtn(Page1, "Noclip [KAPALI]")
-local InfJumpBtn = makeBtn(Page1, "Inj Jump [KAPALI]")
-local GravBtn = makeBtn(Page1, "Dusuk Gravity [KAPALI]")
-
-local ESPBtn = makeBtn(Page2, "ESP [KAPALI]")
-local AimBtn = makeBtn(Page2, "Aimbot [KAPALI]")
-local FovBox = makeBox(Page2, "FOV: 70")
-local FullBrightBtn = makeBtn(Page2, "FullBright [KAPALI]")
-local HitboxBtn = makeBtn(Page2, "Genis Hitbox [KAPALI]")
-
-local SpinBtn = makeBtn(Page3, "Spinbot [KAPALI]")
-
-local Crosshair = Instance.new("Frame", ScreenGui)
-Crosshair.Size = UDim2.new(0, 40, 0, 40)
-Crosshair.Position = UDim2.new(0.5, -20, 0.5, -20)
-Crosshair.BackgroundTransparency = 1
-Crosshair.ZIndex = 200
-Crosshair.Visible = false
-for _, v in ipairs({"Left","Right","Top","Bot"}) do
-    local f = Instance.new("Frame", Crosshair)
-    f.BorderSizePixel = 0; f.BackgroundColor3 = Color3.new(1, 0, 0)
-    if v == "Left" then f.Size = UDim2.new(0, 14, 0, 2); f.Position = UDim2.new(0, 0, 0.5, -1)
-    elseif v == "Right" then f.Size = UDim2.new(0, 14, 0, 2); f.Position = UDim2.new(1, -14, 0.5, -1)
-    elseif v == "Top" then f.Size = UDim2.new(0, 2, 0, 14); f.Position = UDim2.new(0.5, -1, 0, 0)
-    elseif v == "Bot" then f.Size = UDim2.new(0, 2, 0, 14); f.Position = UDim2.new(0.5, -1, 1, -14) end
-end
-local cd = Instance.new("Frame", Crosshair)
-cd.Size = UDim2.new(0, 4, 0, 4); cd.Position = UDim2.new(0.5, -2, 0.5, -2)
-cd.BackgroundColor3 = Color3.new(1, 1, 1); cd.BorderSizePixel = 0
-Instance.new("UICorner", cd).CornerRadius = UDim.new(1, 0)
-
-Toggle.Activated:Connect(function() Menu.Visible = not Menu.Visible end)
-Close.Activated:Connect(function() Menu.Visible = false end)
-
-FlyBox.FocusLost:Connect(function()
-    local n = tonumber(FlyBox.Text:match("%d+"))
-    if n then flySpeed = math.clamp(n, 1, 500); FlyBox.Text = "Fly Hizi: " .. flySpeed end
-end)
-SpeedBox.FocusLost:Connect(function()
-    local n = tonumber(SpeedBox.Text:match("%d+"))
-    if n then walkSpeed = math.clamp(n, 1, 500); SpeedBox.Text = "Hiz: " .. walkSpeed end
-end)
-JumpBox.FocusLost:Connect(function()
-    local n = tonumber(JumpBox.Text:match("%d+"))
-    if n then jumpPower = math.clamp(n, 1, 500); JumpBox.Text = "Ziplama: " .. jumpPower end
-end)
-FovBox.FocusLost:Connect(function()
-    local n = tonumber(FovBox.Text:match("%d+"))
-    if n then fov = math.clamp(n, 30, 120); Cam.FieldOfView = fov; FovBox.Text = "FOV: " .. fov end
+-- Motorlar ve Looplar
+UserInputService.JumpRequest:Connect(function()
+    if infJumpActive and localPlayer.Character then
+        local hum = localPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end
 end)
 
-FlyBtn.Activated:Connect(function()
-    flying = not flying
-    FlyBtn.Text = "Fly: " .. (flying and "ACIK" or "KAPALI")
-    FlyBtn.TextColor3 = flying and Color3.new(0.3, 1, 0.3) or Color3.new(1, 0.3, 0.3)
-    local c = Player.Character; local h = c and c:FindFirstChildOfClass("Humanoid")
-    if c and c:FindFirstChild("HumanoidRootPart") and h then
-        if flying then
-            h.PlatformStand = true
-            local bg = Instance.new("BodyGyro", c.HumanoidRootPart); bg.P = 9e4; bg.MaxTorque = Vector3.new(9e9,9e9,9e9); bg.CFrame = c.HumanoidRootPart.CFrame
-            local bv = Instance.new("BodyVelocity", c.HumanoidRootPart); bv.MaxForce = Vector3.new(9e9,9e9,9e9)
-            task.spawn(function()
-                while flying and c:FindFirstChild("HumanoidRootPart") and h do
-                    RS.RenderStepped:Wait()
-                    local md = h.MoveDirection; local vel = Vector3.zero
-                    if md.Magnitude > 0 then
-                        local fl = Vector3.new(Cam.CFrame.LookVector.X, 0, Cam.CFrame.LookVector.Z).Unit
-                        local fr = Vector3.new(Cam.CFrame.RightVector.X, 0, Cam.CFrame.RightVector.Z).Unit
-                        vel = (Cam.CFrame.LookVector * md:Dot(fl)) + (Cam.CFrame.RightVector * md:Dot(fr))
-                    end
-                    if h.Jump then vel += Vector3.new(0,1,0) end
-                    bv.Velocity = vel.Magnitude > 0 and vel.Unit * flySpeed or Vector3.zero
-                    bg.CFrame = Cam.CFrame
+RunService.Stepped:Connect(function()
+    if noclipActive and localPlayer.Character then
+        for _, v in pairs(localPlayer.Character:GetDescendants()) do
+            if v:IsA("BasePart") then v.CanCollide = false end
+        end
+    end
+end)
+
+-- ESP Loop (Farklı Takım Renkleri Entegre)
+RunService.RenderStepped:Connect(function()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= localPlayer and player.Character then
+            local char = player.Character
+            local box = char:FindFirstChild("CleanESPBox")
+            if espActive then
+                if not box then
+                    box = Instance.new("Highlight")
+                    box.Name = "CleanESPBox"
+                    box.Adornee = char
+                    box.Parent = char
                 end
-                bg:Destroy(); bv:Destroy(); if h then h.PlatformStand = false end
-            end)
-        else h.PlatformStand = false end
-    end
-end)
-
-SpeedBtn.Activated:Connect(function()
-    speedHack = not speedHack
-    SpeedBtn.Text = "Hiz Hack: " .. (speedHack and "ACIK" or "KAPALI")
-    SpeedBtn.TextColor3 = speedHack and Color3.new(0.3, 1, 0.3) or Color3.new(1, 0.3, 0.3)
-    if not speedHack and Player.Character then
-        local h = Player.Character:FindFirstChildOfClass("Humanoid")
-        if h then h.WalkSpeed = 16 end
-    end
-end)
-
-JumpBtn.Activated:Connect(function()
-    jumpHack = not jumpHack
-    JumpBtn.Text = "Ziplama Hack: " .. (jumpHack and "ACIK" or "KAPALI")
-    JumpBtn.TextColor3 = jumpHack and Color3.new(0.3, 1, 0.3) or Color3.new(1, 0.3, 0.3)
-    if not jumpHack and Player.Character then
-        local h = Player.Character:FindFirstChildOfClass("Humanoid")
-        if h then h.JumpPower = 50; h.UseJumpPower = false end
-    end
-end)
-
-NoclipBtn.Activated:Connect(function()
-    noclip = not noclip
-    NoclipBtn.Text = "Noclip: " .. (noclip and "ACIK" or "KAPALI")
-    NoclipBtn.TextColor3 = noclip and Color3.new(0.3, 1, 0.3) or Color3.new(1, 0.3, 0.3)
-    if not noclip and Player.Character then
-        for _, p in ipairs(Player.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = true end end
-    end
-end)
-
-InfJumpBtn.Activated:Connect(function()
-    infJump = not infJump
-    InfJumpBtn.Text = "Inj Jump: " .. (infJump and "ACIK" or "KAPALI")
-    InfJumpBtn.TextColor3 = infJump and Color3.new(0.3, 1, 0.3) or Color3.new(1, 0.3, 0.3)
-end)
-
-GravBtn.Activated:Connect(function()
-    lowGrav = not lowGrav
-    GravBtn.Text = "Dusuk Gravity: " .. (lowGrav and "ACIK" or "KAPALI")
-    GravBtn.TextColor3 = lowGrav and Color3.new(0.3, 1, 0.3) or Color3.new(1, 0.3, 0.3)
-    WS.Gravity = lowGrav and 50 or 196.2
-end)
-
-ESPBtn.Activated:Connect(function()
-    esp = not esp
-    ESPBtn.Text = "ESP: " .. (esp and "ACIK" or "KAPALI")
-    ESPBtn.TextColor3 = esp and Color3.new(0.3, 1, 0.3) or Color3.new(1, 0.3, 0.3)
-    if not esp then
-        for _, pl in ipairs(game.Players:GetPlayers()) do
-            if pl.Character and pl.Character:FindFirstChild("Head") then
-                local bb = pl.Character.Head:FindFirstChild("VexESPBB")
-                if bb then bb:Destroy() end
+                box.FillColor = getTeamColor(player)
+                box.OutlineColor = Color3.fromRGB(255, 255, 255)
+                box.Enabled = true
+            else
+                if box then box.Enabled = false end
             end
         end
     end
 end)
 
-AimBtn.Activated:Connect(function()
-    aimbot = not aimbot
-    AimBtn.Text = "Aimbot: " .. (aimbot and "ACIK" or "KAPALI")
-    AimBtn.TextColor3 = aimbot and Color3.new(0.3, 1, 0.3) or Color3.new(1, 0.3, 0.3)
-    Crosshair.Visible = aimbot
-end)
+-- Fly, Speed & Aimbot
+local bv, bg
+RunService.RenderStepped:Connect(function()
+    local char = localPlayer.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local hrp = char:FindFirstChild("HumanoidRootPart")
 
-FullBrightBtn.Activated:Connect(function()
-    fullBright = not fullBright
-    FullBrightBtn.Text = "FullBright: " .. (fullBright and "ACIK" or "KAPALI")
-    FullBrightBtn.TextColor3 = fullBright and Color3.new(0.3, 1, 0.3) or Color3.new(1, 0.3, 0.3)
-    if fullBright then
-        Lighting.Ambient = Color3.new(1, 1, 1)
-        Lighting.Brightness = 2
-        Lighting.GlobalShadows = false
-        Lighting.ClockTime = 14
+    if hum then
+        if speedActive and not flyActive then
+            hum.WalkSpeed = speedVal
+        end
+    end
+
+    if flyActive and hrp and hum then
+        hum.PlatformStand = true
+        if not bv then
+            bv = Instance.new("BodyVelocity")
+            bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+            bv.Parent = hrp
+        end
+        if not bg then
+            bg = Instance.new("BodyGyro")
+            bg.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
+            bg.P = 9e4
+            bg.Parent = hrp
+        end
+        bg.CFrame = camera.CFrame
+        local mDir = hum.MoveDirection
+        if mDir.Magnitude > 0 then
+            local cCF = camera.CFrame
+            local lVec = cCF:VectorToObjectSpace(mDir)
+            local fwd = cCF.LookVector * (-lVec.Z)
+            local rgt = cCF.RightVector * (lVec.X)
+            bv.Velocity = (fwd + rgt).Unit * flySpeedVal
+        else
+            bv.Velocity = Vector3.new(0, 0, 0)
+        end
     else
-        Lighting.Ambient = defaultAmbient
-        Lighting.Brightness = defaultBrightness
-        Lighting.GlobalShadows = defaultShadows
-        Lighting.ClockTime = defaultClock
+        if hum and hum.PlatformStand then hum.PlatformStand = false end
+        if bv then bv:Destroy() bv = nil end
+        if bg then bg:Destroy() bg = nil end
     end
-end)
+if aimbotActive then
+        local target = nil
+        local minDist = math.huge
+        local center = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
 
-HitboxBtn.Activated:Connect(function()
-    hitbox = not hitbox
-    HitboxBtn.Text = "Genis Hitbox: " .. (hitbox and "ACIK" or "KAPALI")
-    HitboxBtn.TextColor3 = hitbox and Color3.new(0.3, 1, 0.3) or Color3.new(1, 0.3, 0.3)
-    if not hitbox then
-        for _, pl in ipairs(game.Players:GetPlayers()) do
-            if pl ~= Player and pl.Character and pl.Character:FindFirstChild("HumanoidRootPart") then
-                pl.Character.HumanoidRootPart.Size = Vector3.new(2, 2, 1)
-                pl.Character.HumanoidRootPart.Transparency = 1
-            end
-        end
-    end
-end)
-
-SpinBtn.Activated:Connect(function()
-    spinbot = not spinbot
-    SpinBtn.Text = "Spinbot: " .. (spinbot and "ACIK" or "KAPALI")
-    SpinBtn.TextColor3 = spinbot and Color3.new(0.3, 1, 0.3) or Color3.new(1, 0.3, 0.3)
-end)
-
-RS.Stepped:Connect(function()
-    local c = Player.Character
-    if c then
-        local h = c:FindFirstChildOfClass("Humanoid")
-        if h then
-            if speedHack then h.WalkSpeed = walkSpeed end
-            if jumpHack then h.UseJumpPower = true; h.JumpPower = jumpPower end
-        end
-        if noclip then for _, p in ipairs(c:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end end
-    end
-end)
-
-UIS.JumpRequest:Connect(function()
-    if infJump and Player.Character and Player.Character:FindFirstChildOfClass("Humanoid") then
-        Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-    end
-end)
-
-RS.RenderStepped:Connect(function()
-    if aimbot then
-        local t, md = nil, math.huge
-        local c = Player.Character
-        local mp = c and c:FindFirstChild("HumanoidRootPart") and c.HumanoidRootPart.Position
-        if mp then
-            for _, pl in ipairs(game.Players:GetPlayers()) do
-                if pl ~= Player and pl.Character and pl.Character:FindFirstChild("Head") and pl.Character:FindFirstChildOfClass("Humanoid") and pl.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
-                    local pos = pl.Character.Head.Position
-                    local d = (mp - pos).Magnitude
-                    local _, vis = Cam:WorldToViewportPoint(pos)
-                    if vis and d < md then md = d; t = pl end
-                end
-            end
-            if t and t.Character and t.Character:FindFirstChild("Head") then
-                local targetPos = t.Character.Head.Position
-                Cam.CFrame = CFrame.new(Cam.CFrame.Position, targetPos)
-                if c and c:FindFirstChild("HumanoidRootPart") then
-                    c.HumanoidRootPart.CFrame = CFrame.new(c.HumanoidRootPart.Position, Vector3.new(targetPos.X, c.HumanoidRootPart.Position.Y, targetPos.Z))
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= localPlayer then
+                local isTeam = teamCheckActive and player.Team and localPlayer.Team and player.Team == localPlayer.Team
+                if not isTeam and player.Character and player.Character:FindFirstChild("Head") then
+                    local head = player.Character.Head
+                    local pos, onScreen = camera:WorldToViewportPoint(head.Position)
+                    if onScreen then
+                        local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                        if dist < minDist then
+                            local canSee = true
+                            if wallCheckActive then
+                                local rayParams = RaycastParams.new()
+                                rayParams.FilterType = Enum.RaycastFilterType.Exclude
+                                rayParams.FilterDescendantsInstances = {char, camera}
+                                local res = workspace:Raycast(camera.CFrame.Position, head.Position - camera.CFrame.Position, rayParams)
+                                if res and not res.Instance:IsDescendantOf(player.Character) then
+                                    canSee = false
+                                end
+                            end
+                            if canSee then
+                                minDist = dist
+                                target = head
+                            end
+                        end
+                    end
                 end
             end
         end
-    end
-    
-    if spinbot and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-        Player.Character.HumanoidRootPart.CFrame = Player.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(50), 0)
-    end
-    
-    if hitbox then
-        for _, pl in ipairs(game.Players:GetPlayers()) do
-            if pl ~= Player and pl.Character and pl.Character:FindFirstChild("HumanoidRootPart") then
-                pl.Character.HumanoidRootPart.Size = Vector3.new(15,15,15)
-                pl.Character.HumanoidRootPart.Transparency = 0.6
-                pl.Character.HumanoidRootPart.CanCollide = false
-            end
-        end
-    end
-    
-    if esp then
-        local mp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") and Player.Character.HumanoidRootPart.Position
-        for _, pl in ipairs(game.Players:GetPlayers()) do
-            if pl ~= Player and pl.Character and pl.Character:FindFirstChild("Head") and pl.Character:FindFirstChildOfClass("Humanoid") and mp then
-                local head = pl.Character.Head; local hum = pl.Character:FindFirstChildOfClass("Humanoid")
-                local bb = head:FindFirstChild("VexESPBB")
-                if not bb then
-                    bb = Instance.new("BillboardGui", head); bb.Name = "VexESPBB"
-                    bb.Size = UDim2.new(0, 200, 0, 55); bb.StudsOffset = Vector3.new(0, 2.5, 0); bb.AlwaysOnTop = true
-                    local tl = Instance.new("TextLabel", bb); tl.Size = UDim2.new(1,0,1,0); tl.BackgroundTransparency = 1
-                    tl.TextColor3 = Color3.new(1,1,1); tl.Font = Enum.Font.SourceSansBold; tl.TextSize = 13
-                    tl.TextStrokeTransparency = 0; tl.TextStrokeColor3 = Color3.new(0,0,0)
-                end
-                bb.TextLabel.Text = pl.Name .. "\nCan: " .. math.floor(hum.Health) .. "\nMesafe: " .. math.floor((mp - head.Position).Magnitude) .. "m"
-            end
-        end
-    end
-end)
 
-Player.CharacterAdded:Connect(function(c)
-    local h = c:WaitForChildOfClass("Humanoid")
-    if walkSpeed ~= 16 then h.WalkSpeed = walkSpeed end
-    if noclip then task.wait(0.1); for _, p in ipairs(c:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end end
-    if jumpHack then h.UseJumpPower = true; h.JumpPower = jumpPower end
+        if target then
+            camera.CFrame = CFrame.new(camera.CFrame.Position, target.Position)
+        end
+    end
 end)
