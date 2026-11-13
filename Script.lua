@@ -375,6 +375,7 @@ addToggle(pageMovement, "Infinite Jump", function(state) infJumpActive = state e
 addToggle(pageVisuals, "Master ESP (Highlight)", function(state) espActive = state end)
 
 -- TELEPORT SECTION
+-- 1. Escape Prison Butonu (X: 1207.3, Y: 131.8, Z: -683.2)
 local escapeBtn = Instance.new("TextButton")
 escapeBtn.Size = UDim2.new(0, 410, 0, 45)
 escapeBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 0)
@@ -382,7 +383,7 @@ escapeBtn.BorderSizePixel = 0
 escapeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 escapeBtn.TextSize = 13
 escapeBtn.Font = Enum.Font.GothamBold
-escapeBtn.Text = "Escape Prison (TP to Coords)"
+escapeBtn.Text = "Escape Prison"
 escapeBtn.ZIndex = 1000
 escapeBtn.Parent = pageTeleport
 Instance.new("UICorner", escapeBtn).CornerRadius = UDim.new(0, 6)
@@ -396,6 +397,29 @@ escapeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
+-- 2. TP Nuke Butonu (X: 1472.7, Y: 175.9, Z: -1231.7)
+local nukeBtn = Instance.new("TextButton")
+nukeBtn.Size = UDim2.new(0, 410, 0, 45)
+nukeBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+nukeBtn.BorderSizePixel = 0
+nukeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+nukeBtn.TextSize = 13
+nukeBtn.Font = Enum.Font.GothamBold
+nukeBtn.Text = "TP Nuke"
+nukeBtn.ZIndex = 1000
+nukeBtn.Parent = pageTeleport
+Instance.new("UICorner", nukeBtn).CornerRadius = UDim.new(0, 6)
+
+nukeBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if myRoot then
+            myRoot.CFrame = CFrame.new(1472.7, 175.9, -1231.7)
+        end
+    end)
+end)
+
+-- 3. Teleport to Random Player
 local tpBtn = Instance.new("TextButton")
 tpBtn.Size = UDim2.new(0, 410, 0, 40)
 tpBtn.BackgroundColor3 = Color3.fromRGB(0, 90, 160)
@@ -488,7 +512,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Fly, Speed & Hasar Alabilen Düşman Odaklı Aimbot
+-- Fly, Speed & Doğrudan Çalışan Güvenli Aimbot
 local bv, bg
 RunService.RenderStepped:Connect(function()
     local char = localPlayer.Character
@@ -531,31 +555,23 @@ RunService.RenderStepped:Connect(function()
         if bv then bv:Destroy() bv = nil end
         if bg then bg:Destroy() bg = nil end
     end
-if aimbotActive then
+ if aimbotActive then
         local target = nil
         local minDist = math.huge
         local center = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
 
         for _, player in pairs(Players:GetPlayers()) do
-            if player ~= localPlayer and player.Character then
-                local pChar = player.Character
-                local pHum = pChar:FindFirstChildOfClass("Humanoid")
-                local pHead = pChar:FindFirstChild("Head")
-
-                -- 1. Hasar Verilebilirlik ve Canlılık Kontrolü (Ölüleri ve canı olmayanları ele)
-                local canDamage = pHum and pHum.Health > 0
-
-                -- 2. Takım Kontrolü (Team Check)
-                if canDamage and teamCheckActive then
+            if player ~= localPlayer then
+                local isTeamMate = false
+                if teamCheckActive then
                     if localPlayer.Team and player.Team and localPlayer.Team == player.Team then
-                        canDamage = false
-                    elseif localPlayer.TeamColor and player.TeamColor and localPlayer.TeamColor == player.TeamColor then
-                        canDamage = false
+                        isTeamMate = true
                     end
                 end
 
-                if canDamage and pHead then
-                    local pos, onScreen = camera:WorldToViewportPoint(pHead.Position)
+                if not isTeamMate and player.Character and player.Character:FindFirstChild("Head") then
+                    local head = player.Character.Head
+                    local pos, onScreen = camera:WorldToViewportPoint(head.Position)
                     if onScreen then
                         local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
                         if dist < minDist then
@@ -564,14 +580,14 @@ if aimbotActive then
                                 local rayParams = RaycastParams.new()
                                 rayParams.FilterType = Enum.RaycastFilterType.Exclude
                                 rayParams.FilterDescendantsInstances = {char, camera}
-                                local res = workspace:Raycast(camera.CFrame.Position, pHead.Position - camera.CFrame.Position, rayParams)
-                                if res and not res.Instance:IsDescendantOf(pChar) then
+                                local res = workspace:Raycast(camera.CFrame.Position, head.Position - camera.CFrame.Position, rayParams)
+                                if res and not res.Instance:IsDescendantOf(player.Character) then
                                     canSee = false
                                 end
                             end
                             if canSee then
                                 minDist = dist
-                                target = pHead
+                                target = head
                             end
                         end
                     end
