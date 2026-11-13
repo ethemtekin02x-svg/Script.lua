@@ -374,7 +374,30 @@ addToggle(pageMovement, "Noclip", function(state) noclipActive = state end)
 addToggle(pageMovement, "Infinite Jump", function(state) infJumpActive = state end)
 addToggle(pageVisuals, "Master ESP (Highlight)", function(state) espActive = state end)
 
--- TP to Random Player
+-- TELEPORT SECTION
+-- 1. Escape Prison Butonu (X: 1207.3, Y: 131.8, Z: -683.2)
+local escapeBtn = Instance.new("TextButton")
+escapeBtn.Size = UDim2.new(0, 410, 0, 45)
+escapeBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 0)
+escapeBtn.BorderSizePixel = 0
+escapeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+escapeBtn.TextSize = 13
+escapeBtn.Font = Enum.Font.GothamBold
+escapeBtn.Text = "Escape Prison (TP to Coords)"
+escapeBtn.ZIndex = 1000
+escapeBtn.Parent = pageTeleport
+Instance.new("UICorner", escapeBtn).CornerRadius = UDim.new(0, 6)
+
+escapeBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if myRoot then
+            myRoot.CFrame = CFrame.new(1207.3, 131.8, -683.2)
+        end
+    end)
+end)
+
+-- 2. Teleport to Random Player
 local tpBtn = Instance.new("TextButton")
 tpBtn.Size = UDim2.new(0, 410, 0, 40)
 tpBtn.BackgroundColor3 = Color3.fromRGB(0, 90, 160)
@@ -387,7 +410,7 @@ tpBtn.ZIndex = 1000
 tpBtn.Parent = pageTeleport
 Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0, 6)
 
-tpBtn.MouseButton1Click:Connect(default or function()
+tpBtn.MouseButton1Click:Connect(function()
     pcall(function()
         local targets = {}
         for _, v in pairs(Players:GetPlayers()) do
@@ -405,27 +428,27 @@ tpBtn.MouseButton1Click:Connect(default or function()
     end)
 end)
 
--- FARKLI TAKIM RENKLERİ ESP FONKSİYONU
+-- Farklı Takım Renkleri ESP Fonksiyonu
 local function getTeamColor(player)
     if player.Team then
         local tName = player.Team.Name:lower()
         if tName:find("d") or tName:find("sinif") or tName:find("class d") then
-            return Color3.fromRGB(255, 140, 0) -- Turuncu (Sınıf D)
+            return Color3.fromRGB(255, 140, 0)
         elseif tName:find("bilim") or tName:find("scientist") then
-            return Color3.fromRGB(240, 240, 240) -- Beyaz (Bilim Adamı)
+            return Color3.fromRGB(240, 240, 240)
         elseif tName:find("guvenlik") or tName:find("security") or tName:find("guard") then
-            return Color3.fromRGB(100, 100, 120) -- Gri/Mavi (Güvenlik)
+            return Color3.fromRGB(100, 100, 120)
         elseif tName:find("mtf") or tName:find("mobile task") then
-            return Color3.fromRGB(0, 120, 255) -- Mavi (MTF)
-        elseif tName:find("yonetici") or tName:find("site director") or tName:find("admin") then
-            return Color3.fromRGB(200, 0, 200) -- Mor (Yönetici)
+            return Color3.fromRGB(0, 120, 255)
+        elseif tName:find("yonetici") or tName:find("site director") then
+            return Color3.fromRGB(200, 0, 200)
         elseif tName:find("ci") or tName:find("chaos") then
-            return Color3.fromRGB(0, 180, 80) -- Yeşil (Chaos Insurgency)
+            return Color3.fromRGB(0, 180, 80)
         else
             return player.Team.Color.Color
         end
     end
-    return Color3.fromRGB(255, 50, 50) -- Varsayılan Düşman Kırmızı
+    return Color3.fromRGB(255, 50, 50)
 end
 
 -- Motorlar ve Looplar
@@ -444,7 +467,7 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- ESP Loop (Farklı Takım Renkleri Entegre)
+-- ESP Loop
 RunService.RenderStepped:Connect(function()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= localPlayer and player.Character then
