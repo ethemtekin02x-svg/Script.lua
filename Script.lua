@@ -474,6 +474,9 @@ UserInputService.InputChanged:Connect(function(input)
         speedLabel.Text = "Speed Value: " .. speedVal .. " (Max: 255)"
     end
 end)
+
+addToggle(pageMovement, "Fly (Flight)", function(state) flyActive = state end)
+
 -- Fly Speed Slider
 local flySliderFrame = Instance.new("Frame")
 flySliderFrame.Size = UDim2.new(0, 345, 0, 45)
@@ -947,4 +950,3 @@ RunService.RenderStepped:Connect(function()
         end
     end
 end)
-
