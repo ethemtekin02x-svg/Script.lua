@@ -246,8 +246,8 @@ local infJumpActive = false
 local espActive = false
 local fullbrightActive = false
 
--- Seçilen / Hedef Alınacak Oyuncular Tablosu (Whitelist / Target List)
-local selectedTargets = {}
+-- Hariç Tutulacak (Ignored / Blacklist) Oyuncular Tablosu
+local ignoredTargets = {}
 
 addToggle(pageCombat, "Aimbot (Auto-Lock)", function(state) aimbotActive = state end)
 addToggle(pageCombat, "Wall Check (No Wall Aim)", function(state) wallCheckActive = state end)
@@ -256,11 +256,11 @@ addToggle(pageCombat, "FOV Circle (Show Range)", function(state)
     fovCircle.Visible = state
 end)
 
--- Aimbot Hedef Seçim Listesi Başlığı
+-- Aimbot Harici Tutma (Ignore / Blacklist) Listesi Başlığı
 local targetListLabel = Instance.new("TextLabel")
 targetListLabel.Size = UDim2.new(0, 345, 0, 20)
 targetListLabel.BackgroundTransparency = 1
-targetListLabel.Text = "--- Select Target / Whitelist (Head 3D) ---"
+targetListLabel.Text = "--- Ignore / Blacklist (Aimbot Exclude) ---"
 targetListLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
 targetListLabel.TextSize = 11
 targetListLabel.Font = Enum.Font.GothamBold
@@ -291,37 +291,32 @@ local function refreshCombatList()
         if player ~= localPlayer then
             local pBtn = Instance.new("TextButton")
             pBtn.Size = UDim2.new(1, -10, 0, 32)
-            local isSel = selectedTargets[player]
-            pBtn.BackgroundColor3 = isSel and Color3.fromRGB(0, 140, 70) or Color3.fromRGB(35, 35, 45)
+            local isIgnored = ignoredTargets[player]
+            pBtn.BackgroundColor3 = isIgnored and Color3.fromRGB(180, 40, 40) or Color3.fromRGB(35, 35, 45)
             pBtn.BorderSizePixel = 0
             pBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
             pBtn.TextSize = 11
             pBtn.Font = Enum.Font.GothamMedium
-            pBtn.Text = (isSel and "[SELECTED] " or "[ ] ") .. player.Name .. " (Head 3D)"
+            pBtn.Text = (isIgnored and "[IGNORED] " or "[ ] ") .. player.Name .. " (" .. player.DisplayName .. ")"
             pBtn.ZIndex = 1000
             pBtn.Parent = combatScrollFrame
             Instance.new("UICorner", pBtn).CornerRadius = UDim.new(0, 4)
 
             pBtn.MouseButton1Click:Connect(function()
-                if selectedTargets[player] then
-                    selectedTargets[player] = nil
+                if ignoredTargets[player] then
+                    ignoredTargets[player] = nil
                     pBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-                    pBtn.Text = "[ ] " .. player.Name .. " (Head 3D)"
+                    pBtn.Text = "[ ] " .. player.Name .. " (" .. player.DisplayName .. ")"
                 else
-                    selectedTargets[player] = true
-                    pBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 70)
-                    pBtn.Text = "[SELECTED] " .. player.Name .. " (Head 3D)"
+                    ignoredTargets[player] = true
+                    pBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+                    pBtn.Text = "[IGNORED] " .. player.Name .. " (" .. player.DisplayName .. ")"
                 end
             end)
         end
     end
     combatScrollFrame.CanvasSize = UDim2.new(0, 0, 0, combatListLayout.AbsoluteContentSize.Y + 10)
 end
-
-Players.PlayerAdded:Connect(refreshPlayerList or refreshCombatList)
-Players.PlayerRemoving:Connect(refreshPlayerList or refreshCombatList)
-task.spawn(refreshCombatList)
-
 
 addToggle(pageMovement, "Speed Hack", function(state) speedActive = state end)
 
@@ -557,11 +552,11 @@ nukeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- OYUNCU SEÇEREK IŞINLANMA (Player List)
+-- OYUNCU SEÇEREK IŞINLANMA (Player List - Sadece İsim)
 local playerListLabel = Instance.new("TextLabel")
 playerListLabel.Size = UDim2.new(0, 345, 0, 20)
 playerListLabel.BackgroundTransparency = 1
-playerListLabel.Text = "--- Select Player to Teleport (Head 3D) ---"
+playerListLabel.Text = "--- Select Player to Teleport ---"
 playerListLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
 playerListLabel.TextSize = 11
 playerListLabel.Font = Enum.Font.GothamBold
@@ -597,18 +592,17 @@ local function refreshPlayerList()
             pBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
             pBtn.TextSize = 11
             pBtn.Font = Enum.Font.GothamMedium
-            pBtn.Text = player.Name .. " (" .. player.DisplayName .. ") [Head]"
+            pBtn.Text = player.Name .. " (" .. player.DisplayName .. ")"
             pBtn.ZIndex = 1000
             pBtn.Parent = playerScrollFrame
             Instance.new("UICorner", pBtn).CornerRadius = UDim.new(0, 4)
 
             pBtn.MouseButton1Click:Connect(function()
                 pcall(function()
-                    if player.Character and player.Character:FindFirstChild("Head") then
+                    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                         local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
                         if myRoot then
-                            -- Oyuncunun 3D kafa pozisyonuna ışınlanma
-                            myRoot.CFrame = player.Character.Head.CFrame + Vector3.new(0, 3, 0)
+                            myRoot.CFrame = player.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
                         end
                     end
                 end)
@@ -632,6 +626,7 @@ Players.PlayerRemoving:Connect(function()
     refreshCombatList()
 end)
 task.spawn(refreshPlayerList)
+task.spawn(refreshCombatList)
 
 -- Takım Renkleri Fonksiyonu
 local function getTeamColor(player)
@@ -728,7 +723,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Fly, Speed, FOV ve Seçmeli Whitelist Head Aimbot Motoru
+-- Fly, Speed, FOV ve Ignore (Blacklist) Aimbot Motoru
 local bv, bg
 RunService.RenderStepped:Connect(function()
     local char = localPlayer.Character
@@ -778,8 +773,7 @@ RunService.RenderStepped:Connect(function()
         local center = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
 
         for _, player in pairs(Players:GetPlayers()) do
-            -- Sadece whitelist listende seçili olan oyuncuları hedef al
-            if player ~= localPlayer and selectedTargets[player] and player.Character then
+            if player ~= localPlayer and not ignoredTargets[player] and player.Character then
                 local pChar = player.Character
                 local head = pChar:FindFirstChild("Head")
                 local pHum = pChar:FindFirstChildOfClass("Humanoid")
@@ -801,7 +795,7 @@ RunService.RenderStepped:Connect(function()
                             end
                             if canSee then
                                 minDist = dist
-                                target = head -- 3D Kafa Hedefi
+                                target = head
                             end
                         end
                     end
