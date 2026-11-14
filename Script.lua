@@ -342,6 +342,29 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
+-- Takım Renkleri Fonksiyonu
+local function getTeamColor(player)
+    if player.Team then
+        local tName = player.Team.Name:lower()
+        if tName:find("d") or tName:find("sinif") or tName:find("class d") then
+            return Color3.fromRGB(255, 140, 0)
+        elseif tName:find("bilim") or tName:find("scientist") then
+            return Color3.fromRGB(240, 240, 240)
+        elseif tName:find("guvenlik") or tName:find("security") or tName:find("guard") then
+            return Color3.fromRGB(100, 100, 120)
+        elseif tName:find("mtf") or tName:find("mobile task") then
+            return Color3.fromRGB(0, 120, 255)
+        elseif tName:find("yonetici") or tName:find("site director") then
+            return Color3.fromRGB(200, 0, 200)
+        elseif tName:find("ci") or tName:find("chaos") then
+            return Color3.fromRGB(0, 180, 80)
+        else
+            return player.Team.Color.Color
+        end
+    end
+    return Color3.fromRGB(255, 50, 50)
+end
+
 -- Aimbot Ignore Listesi Başlığı
 local targetListLabel = Instance.new("TextLabel")
 targetListLabel.Size = UDim2.new(0, 345, 0, 20)
@@ -385,7 +408,9 @@ refreshCombatList = function()
             pBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
             pBtn.TextSize = 11
             pBtn.Font = Enum.Font.GothamMedium
-            pBtn.Text = (isIgnored and "[IGNORED] " or "[ ] ") .. player.Name .. " (" .. player.DisplayName .. ")"
+            
+            local teamName = player.Team and player.Team.Name or "No Team"
+            pBtn.Text = (isIgnored and "[IGNORED] " or "[ ] ") .. player.Name .. " [" .. teamName .. "]"
             pBtn.ZIndex = 1000
             pBtn.Parent = combatScrollFrame
             Instance.new("UICorner", pBtn).CornerRadius = UDim.new(0, 4)
@@ -394,11 +419,11 @@ refreshCombatList = function()
                 if ignoredTargets[player] then
                     ignoredTargets[player] = nil
                     pBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-                    pBtn.Text = "[ ] " .. player.Name .. " (" .. player.DisplayName .. ")"
+                    pBtn.Text = "[ ] " .. player.Name .. " [" .. teamName .. "]"
                 else
                     ignoredTargets[player] = true
                     pBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-                    pBtn.Text = "[IGNORED] " .. player.Name .. " (" .. player.DisplayName .. ")"
+                    pBtn.Text = "[IGNORED] " .. player.Name .. " [" .. teamName .. "]"
                 end
             end)
         end
@@ -681,7 +706,9 @@ refreshPlayerList = function()
             pBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
             pBtn.TextSize = 11
             pBtn.Font = Enum.Font.GothamMedium
-            pBtn.Text = player.Name .. " (" .. player.DisplayName .. ")"
+            
+            local teamName = player.Team and player.Team.Name or "No Team"
+            pBtn.Text = player.Name .. " [" .. teamName .. "]"
             pBtn.ZIndex = 1000
             pBtn.Parent = playerScrollFrame
             Instance.new("UICorner", pBtn).CornerRadius = UDim.new(0, 4)
@@ -717,29 +744,6 @@ end)
 task.spawn(refreshPlayerList)
 task.spawn(refreshCombatList)
 
--- Takım Renkleri Fonksiyonu (Chaos Insurgency - CI Eklendi)
-local function getTeamColor(player)
-    if player.Team then
-        local tName = player.Team.Name:lower()
-        if tName:find("d") or tName:find("sinif") or tName:find("class d") then
-            return Color3.fromRGB(255, 140, 0)
-        elseif tName:find("bilim") or tName:find("scientist") then
-            return Color3.fromRGB(240, 240, 240)
-        elseif tName:find("guvenlik") or tName:find("security") or tName:find("guard") then
-            return Color3.fromRGB(100, 100, 120)
-        elseif tName:find("mtf") or tName:find("mobile task") then
-            return Color3.fromRGB(0, 120, 255)
-        elseif tName:find("yonetici") or tName:find("site director") then
-            return Color3.fromRGB(200, 0, 200)
-        elseif tName:find("ci") or tName:find("chaos") then
-            return Color3.fromRGB(0, 180, 80)
-        else
-            return player.Team.Color.Color
-        end
-    end
-    return Color3.fromRGB(255, 50, 50)
-end
-
 -- Motorlar ve Looplar
 UserInputService.JumpRequest:Connect(function()
     if infJumpActive and localPlayer.Character then
@@ -756,18 +760,18 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- Gelişmiş ESP Loop
+-- Gelişmiş ESP Loop (Fixlendi)
 RunService.RenderStepped:Connect(function()
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= localPlayer and player.Character then
+        if player ~= localPlayer then
             local char = player.Character
-            local head = char:FindFirstChild("Head")
-            local hum = char:FindFirstChildOfClass("Humanoid")
+            local head = char and char:FindFirstChild("Head")
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
             
-            local box = char:FindFirstChild("CleanESPBox")
-            local bill = char:FindFirstChild("CleanESPBillboard")
+            local box = char and char:FindFirstChild("CleanESPBox")
+            local bill = char and char:FindFirstChild("CleanESPBillboard")
             
-            if espActive and head and hum and hum.Health > 0 then
+            if espActive and char and head and hum and hum.Health > 0 then
                 if not box then
                     box = Instance.new("Highlight")
                     box.Name = "CleanESPBox"
@@ -803,6 +807,7 @@ RunService.RenderStepped:Connect(function()
                 if txtLabel then
                     txtLabel.Text = player.Name .. "\nHP: " .. math.floor(hum.Health) .. " | " .. tName
                 end
+                bill.Adornee = head
                 bill.Enabled = true
             else
                 if box then box.Enabled = false end
