@@ -23,6 +23,16 @@ screenGui.Parent = targetParent
 
 local isMenuLocked = false
 
+-- FOV Çemberi Görseli
+local fovCircle = Drawing.new("Circle")
+fovCircle.Visible = false
+fovCircle.Radius = 120
+fovCircle.Color = Color3.fromRGB(0, 230, 118)
+fovCircle.Thickness = 1
+fovCircle.Filled = false
+fovCircle.Transparency = 0.7
+fovCircle.Position = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+
 -- 1. TOGGLE BUTTON (MOD Butonu)
 local toggleBtn = Instance.new("TextButton")
 toggleBtn.Name = "ToggleMenuBtn"
@@ -226,7 +236,8 @@ end
 -- Değişkenler
 local aimbotActive = false
 local wallCheckActive = true
-local teamCheckActive = false -- Varsayılan kapalı yapıldı ki kimse takıldı diye aim gitmezlik yapmasın
+local fovCircleActive = false
+local triggerBotActive = false
 local speedActive = false
 local speedVal = 16
 local flyActive = false
@@ -238,7 +249,11 @@ local fullbrightActive = false
 
 addToggle(pageCombat, "Aimbot (Auto-Lock)", function(state) aimbotActive = state end)
 addToggle(pageCombat, "Wall Check (No Wall Aim)", function(state) wallCheckActive = state end)
-addToggle(pageCombat, "Team Check (Safe Filter)", function(state) teamCheckActive = state end)
+addToggle(pageCombat, "FOV Circle (Show Range)", function(state)
+    fovCircleActive = state
+    fovCircle.Visible = state
+end)
+addToggle(pageCombat, "TriggerBot (Auto Shoot)", function(state) triggerBotActive = state end)
 
 addToggle(pageMovement, "Speed Hack", function(state) speedActive = state end)
 
@@ -513,11 +528,6 @@ local function refreshPlayerList()
     end
     playerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, playerListLayout.AbsoluteContentSize.Y + 10)
 end
-
-Players.PlayerAdded:Connect(refreshPlayerList)
-Players.PlayerRemoving:Connect(refreshPlayerList)
-task.spawn(refreshPlayerList)
-
 -- Takım Renkleri Fonksiyonu
 local function getTeamColor(player)
     if player.Team then
@@ -540,6 +550,7 @@ local function getTeamColor(player)
     end
     return Color3.fromRGB(255, 50, 50)
 end
+
 -- Motorlar ve Looplar
 UserInputService.JumpRequest:Connect(function()
     if infJumpActive and localPlayer.Character then
@@ -612,7 +623,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Fly, Speed & Kesintisiz Kararlı Aimbot Motoru
+-- Fly, Speed, FOV ve Aimbot Motoru
 local bv, bg
 RunService.RenderStepped:Connect(function()
     local char = localPlayer.Character
@@ -662,39 +673,29 @@ RunService.RenderStepped:Connect(function()
         local center = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
 
         for _, player in pairs(Players:GetPlayers()) do
-            if player ~= localPlayer then
-                local isTeamMate = false
+            if player ~= localPlayer and player.Character then
+                local pChar = player.Character
+                local head = pChar:FindFirstChild("Head")
+                local pHum = pChar:FindFirstChildOfClass("Humanoid")
                 
-                -- Team Check açıksa ve takım verileri tam eşleşiyorsa pas geç
-                if teamCheckActive and localPlayer.Team and player.Team then
-                    if localPlayer.Team == player.Team then
-                        isTeamMate = true
-                    end
-                end
-
-                if not isTeamMate and player.Character and player.Character:FindFirstChild("Head") then
-                    local head = player.Character.Head
-                    local pHum = player.Character:FindFirstChildOfClass("Humanoid")
-                    
-                    if pHum and pHum.Health > 0 then
-                        local pos, onScreen = camera:WorldToViewportPoint(head.Position)
-                        if onScreen then
-                            local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
-                            if dist < minDist then
-                                local canSee = true
-                                if wallCheckActive then
-                                    local rayParams = RaycastParams.new()
-                                    rayParams.FilterType = Enum.RaycastFilterType.Exclude
-                                    rayParams.FilterDescendantsInstances = {char, camera}
-                                    local res = workspace:Raycast(camera.CFrame.Position, head.Position - camera.CFrame.Position, rayParams)
-                                    if res and not res.Instance:IsDescendantOf(player.Character) then
-                                        canSee = false
-                                    end
+                if head and pHum and pHum.Health > 0 then
+                    local pos, onScreen = camera:WorldToViewportPoint(head.Position)
+                    if onScreen then
+                        local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                        if dist < minDist then
+                            local canSee = true
+                            if wallCheckActive then
+                                local rayParams = RaycastParams.new()
+                                rayParams.FilterType = Enum.RaycastFilterType.Exclude
+                                rayParams.FilterDescendantsInstances = {char, camera}
+                                local res = workspace:Raycast(camera.CFrame.Position, head.Position - camera.CFrame.Position, rayParams)
+                                if res and not res.Instance:IsDescendantOf(pChar) then
+                                    canSee = false
                                 end
-                                if canSee then
-                                    minDist = dist
-                                    target = head
-                                end
+                            end
+                            if canSee then
+                                minDist = dist
+                                target = head
                             end
                         end
                     end
@@ -704,6 +705,9 @@ RunService.RenderStepped:Connect(function()
 
         if target then
             camera.CFrame = CFrame.new(camera.CFrame.Position, target.Position)
+            if triggerBotActive then
+                mouse1click()
+            end
         end
     end
 end)
