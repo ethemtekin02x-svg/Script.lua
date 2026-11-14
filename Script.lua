@@ -3,12 +3,13 @@ local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
 
 local localPlayer = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
--- ScreenGui (En Üst Katman - Marketlerin Asla Altında Kalmaz)
+-- ScreenGui (En Üst Katman)
 local targetParent = localPlayer:WaitForChild("PlayerGui")
 local existingGui = targetParent:FindFirstChild("UltimateCleanModMenu") or CoreGui:FindFirstChild("UltimateCleanModMenu")
 if existingGui then existingGui:Destroy() end
@@ -41,11 +42,11 @@ local cornerToggle = Instance.new("UICorner")
 cornerToggle.CornerRadius = UDim.new(0, 8)
 cornerToggle.Parent = toggleBtn
 
--- 2. MAIN MENU (Küçültülmüş Kompakt Boyut)
+-- 2. MAIN MENU (Kompakt Boyut)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 520, 0, 360)
-mainFrame.Position = UDim2.new(0.5, -260, 0.5, -180)
+mainFrame.Size = UDim2.new(0, 520, 0, 380)
+mainFrame.Position = UDim2.new(0.5, -260, 0.5, -190)
 mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 mainFrame.BorderColor3 = Color3.fromRGB(40, 40, 50)
 mainFrame.BorderSizePixel = 2
@@ -102,7 +103,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 end)
 
 -- Title Bar (Made by blackhat İmzalı)
-local titleLabel = Instance.new("TextLabel")
+local titleLabel = Instance.new("TextButton")
 titleLabel.Size = UDim2.new(1, 0, 0, 35)
 titleLabel.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
 titleLabel.BorderSizePixel = 0
@@ -157,7 +158,7 @@ local function createTab(name)
     page.Size = UDim2.new(1, 0, 1, 0)
     page.BackgroundTransparency = 1
     page.Visible = false
-    page.CanvasSize = UDim2.new(0, 0, 0, 900)
+    page.CanvasSize = UDim2.new(0, 0, 0, 1000)
     page.ScrollBarThickness = 4
     page.ZIndex = 1000
     page.Parent = contentFrame
@@ -233,14 +234,15 @@ local flySpeedVal = 50
 local noclipActive = false
 local infJumpActive = false
 local espActive = false
+local fullbrightActive = false
 
 addToggle(pageCombat, "Aimbot (Auto-Lock)", function(state) aimbotActive = state end)
 addToggle(pageCombat, "Wall Check (No Wall Aim)", function(state) wallCheckActive = state end)
-addToggle(pageCombat, "Team Check (No Team Aim)", function(state) teamCheckActive = state end)
+addToggle(pageCombat, "Team Check (Strict)", function(state) teamCheckActive = state end)
 
 addToggle(pageMovement, "Speed Hack", function(state) speedActive = state end)
 
--- Speed Slider (1 - 255)
+-- Speed Slider
 local speedSliderFrame = Instance.new("Frame")
 speedSliderFrame.Size = UDim2.new(0, 345, 0, 45)
 speedSliderFrame.BackgroundTransparency = 1
@@ -306,7 +308,7 @@ end)
 
 addToggle(pageMovement, "Fly (Flight)", function(state) flyActive = state end)
 
--- Fly Speed Slider (1 - 200)
+-- Fly Speed Slider
 local flySliderFrame = Instance.new("Frame")
 flySliderFrame.Size = UDim2.new(0, 345, 0, 45)
 flySliderFrame.BackgroundTransparency = 1
@@ -372,7 +374,21 @@ end)
 
 addToggle(pageMovement, "Noclip", function(state) noclipActive = state end)
 addToggle(pageMovement, "Infinite Jump", function(state) infJumpActive = state end)
-addToggle(pageVisuals, "Master ESP (Highlight)", function(state) espActive = state end)
+
+-- VISUALS SECTION
+addToggle(pageVisuals, "Advanced ESP (Box + Info)", function(state) espActive = state end)
+addToggle(pageVisuals, "Fullbright (No Darkness)", function(state)
+    fullbrightActive = state
+    if fullbrightActive then
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.GlobalShadows = false
+        Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+    else
+        Lighting.GlobalShadows = true
+        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+    end
+end)
 
 -- TELEPORT SECTION
 local escapeBtn = Instance.new("TextButton")
@@ -392,6 +408,27 @@ escapeBtn.MouseButton1Click:Connect(function()
         local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
         if myRoot then
             myRoot.CFrame = CFrame.new(1207.3, 131.8, -683.2)
+        end
+    end)
+end)
+
+local tpPrisonBtn = Instance.new("TextButton")
+tpPrisonBtn.Size = UDim2.new(0, 345, 0, 35)
+tpPrisonBtn.BackgroundColor3 = Color3.fromRGB(140, 0, 180)
+tpPrisonBtn.BorderSizePixel = 0
+tpPrisonBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+tpPrisonBtn.TextSize = 11
+tpPrisonBtn.Font = Enum.Font.GothamBold
+tpPrisonBtn.Text = "TP Prison"
+tpPrisonBtn.ZIndex = 1000
+tpPrisonBtn.Parent = pageTeleport
+Instance.new("UICorner", tpPrisonBtn).CornerRadius = UDim.new(0, 6)
+
+tpPrisonBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if myRoot then
+            myRoot.CFrame = CFrame.new(1344.3, 137.1, -1047.5)
         end
     end)
 end)
@@ -429,7 +466,7 @@ playerListLabel.ZIndex = 1000
 playerListLabel.Parent = pageTeleport
 
 local playerScrollFrame = Instance.new("ScrollingFrame")
-playerScrollFrame.Size = UDim2.new(0, 345, 0, 130)
+playerScrollFrame.Size = UDim2.new(0, 345, 0, 110)
 playerScrollFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
 playerScrollFrame.BorderSizePixel = 0
 playerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -481,7 +518,7 @@ Players.PlayerAdded:Connect(refreshPlayerList)
 Players.PlayerRemoving:Connect(refreshPlayerList)
 task.spawn(refreshPlayerList)
 
--- Farklı Takım Renkleri ESP Fonksiyonu
+-- Takım Renkleri Fonksiyonu
 local function getTeamColor(player)
     if player.Team then
         local tName = player.Team.Name:lower()
@@ -494,7 +531,8 @@ local function getTeamColor(player)
         elseif tName:find("mtf") or tName:find("mobile task") then
             return Color3.fromRGB(0, 120, 255)
         elseif tName:find("yonetici") or tName:find("site director") then
-            return Color3.fromRGB(200, 0, 200)
+            stringColor = Color3.fromRGB(200, 0, 200)
+            return stringColor
         elseif tName:find("ci") or tName:find("chaos") then
             return Color3.fromRGB(0, 180, 80)
         else
@@ -503,7 +541,6 @@ local function getTeamColor(player)
     end
     return Color3.fromRGB(255, 50, 50)
 end
-
 -- Motorlar ve Looplar
 UserInputService.JumpRequest:Connect(function()
     if infJumpActive and localPlayer.Character then
@@ -520,13 +557,18 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- ESP Loop
+-- Gelişmiş ESP Loop
 RunService.RenderStepped:Connect(function()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= localPlayer and player.Character then
             local char = player.Character
+            local head = char:FindFirstChild("Head")
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            
             local box = char:FindFirstChild("CleanESPBox")
-            if espActive then
+            local bill = char:FindFirstChild("CleanESPBillboard")
+            
+            if espActive and head and hum and hum.Health > 0 then
                 if not box then
                     box = Instance.new("Highlight")
                     box.Name = "CleanESPBox"
@@ -536,13 +578,42 @@ RunService.RenderStepped:Connect(function()
                 box.FillColor = getTeamColor(player)
                 box.OutlineColor = Color3.fromRGB(255, 255, 255)
                 box.Enabled = true
+
+                if not bill then
+                    bill = Instance.new("BillboardGui")
+                    bill.Name = "CleanESPBillboard"
+                    bill.Size = UDim2.new(0, 150, 0, 50)
+                    bill.StudsOffset = Vector3.new(0, 3, 0)
+                    bill.AlwaysOnTop = true
+                    bill.Adornee = head
+                    bill.Parent = char
+
+                    local txt = Instance.new("TextLabel")
+                    txt.Name = "InfoText"
+                    txt.Size = UDim2.new(1, 0, 1, 0)
+                    txt.BackgroundTransparency = 1
+                    txt.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    txt.TextSize = 11
+                    txt.Font = Enum.Font.GothamBold
+                    txt.TextStrokeTransparency = 0.2
+                    txt.Parent = bill
+                end
+                
+                local tName = player.Team and player.Team.Name or "Unknown"
+                local txtLabel = bill:FindFirstChild("InfoText")
+                if txtLabel then
+                    txtLabel.Text = player.Name .. "\nHP: " .. math.floor(hum.Health) .. " | " .. tName
+                end
+                bill.Enabled = true
             else
                 if box then box.Enabled = false end
+                if bill then bill.Enabled = false end
             end
         end
     end
 end)
--- Fly, Speed & Aimbot Motoru
+
+-- Fly, Speed & Kesin Takım Filtreli Aimbot Motoru
 local bv, bg
 RunService.RenderStepped:Connect(function()
     local char = localPlayer.Character
@@ -594,31 +665,43 @@ RunService.RenderStepped:Connect(function()
         for _, player in pairs(Players:GetPlayers()) do
             if player ~= localPlayer then
                 local isTeamMate = false
+                
+                -- KESİN TAKIM KONTROLÜ (Team Check)
                 if teamCheckActive then
-                    if localPlayer.Team and player.Team and localPlayer.Team == player.Team then
+                    if localPlayer.Team and player.Team then
+                        if localPlayer.Team == player.Team then
+                            isTeamMate = true
+                        end
+                    end
+                    -- Ekstra Güvenlik: Eğer oyun içi takım isimleri veya renkleri birebir tutuyorsa takımdadır
+                    if player.TeamColor and localPlayer.TeamColor and player.TeamColor == localPlayer.TeamColor then
                         isTeamMate = true
                     end
                 end
 
                 if not isTeamMate and player.Character and player.Character:FindFirstChild("Head") then
                     local head = player.Character.Head
-                    local pos, onScreen = camera:WorldToViewportPoint(head.Position)
-                    if onScreen then
-                        local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
-                        if dist < minDist then
-                            local canSee = true
-                            if wallCheckActive then
-                                local rayParams = RaycastParams.new()
-                                rayParams.FilterType = Enum.RaycastFilterType.Exclude
-                                rayParams.FilterDescendantsInstances = {char, camera}
-                                local res = workspace:Raycast(camera.CFrame.Position, head.Position - camera.CFrame.Position, rayParams)
-                                if res and not res.Instance:IsDescendantOf(player.Character) then
-                                    canSee = false
+                    local pHum = player.Character:FindFirstChildOfClass("Humanoid")
+                    
+                    if pHum and pHum.Health > 0 then
+                        local pos, onScreen = camera:WorldToViewportPoint(head.Position)
+                        if onScreen then
+                            local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                            if dist < minDist then
+                                local canSee = true
+                                if wallCheckActive then
+                                    local rayParams = RaycastParams.new()
+                                    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+                                    rayParams.FilterDescendantsInstances = {char, camera}
+                                    local res = workspace:Raycast(camera.CFrame.Position, head.Position - camera.CFrame.Position, rayParams)
+                                    if res and not res.Instance:IsDescendantOf(player.Character) then
+                                        canSee = false
+                                    end
                                 end
-                            end
-                            if canSee then
-                                minDist = dist
-                                target = head
+                                if canSee then
+                                    minDist = dist
+                                    target = head
+                                end
                             end
                         end
                     end
