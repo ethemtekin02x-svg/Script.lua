@@ -24,9 +24,10 @@ screenGui.Parent = targetParent
 local isMenuLocked = false
 
 -- FOV Çemberi Görseli
+local fovRadiusVal = 120
 local fovCircle = Drawing.new("Circle")
 fovCircle.Visible = false
-fovCircle.Radius = 120
+fovCircle.Radius = fovRadiusVal
 fovCircle.Color = Color3.fromRGB(0, 230, 118)
 fovCircle.Thickness = 1
 fovCircle.Filled = false
@@ -124,6 +125,26 @@ titleLabel.Font = Enum.Font.GothamBold
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.ZIndex = 1000
 titleLabel.Parent = mainFrame
+
+-- Menüyü Tamamen Kapatan Çarpı (X) Butonu
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 35, 0, 35)
+closeBtn.Position = UDim2.new(1, -35, 0, 0)
+closeBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+closeBtn.BorderSizePixel = 0
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.TextSize = 14
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.ZIndex = 1001
+closeBtn.Parent = mainFrame
+
+closeBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        fovCircle:Remove()
+    end)
+    screenGui:Destroy()
+end)
 
 -- Tabs List
 local tabListFrame = Instance.new("ScrollingFrame")
@@ -246,6 +267,9 @@ local infJumpActive = false
 local espActive = false
 local fullbrightActive = false
 
+-- Kaydedilen Konum Değişkeni (Save Position)
+local savedCFrame = nil
+
 -- Hariç Tutulacak (Ignored / Blacklist) Oyuncular Tablosu
 local ignoredTargets = {}
 
@@ -254,6 +278,71 @@ addToggle(pageCombat, "Wall Check (No Wall Aim)", function(state) wallCheckActiv
 addToggle(pageCombat, "FOV Circle (Show Range)", function(state)
     fovCircleActive = state
     fovCircle.Visible = state
+end)
+
+-- Custom FOV Slider (Combat Sekmesi)
+local fovSliderFrame = Instance.new("Frame")
+fovSliderFrame.Size = UDim2.new(0, 345, 0, 45)
+fovSliderFrame.BackgroundTransparency = 1
+fovSliderFrame.ZIndex = 1000
+fovSliderFrame.Parent = pageCombat
+
+local fovLabel = Instance.new("TextLabel")
+fovLabel.Size = UDim2.new(1, 0, 0, 18)
+fovLabel.BackgroundTransparency = 1
+fovLabel.Text = "FOV Range: 120 (Max: 400)"
+fovLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
+fovLabel.TextSize = 11
+fovLabel.Font = Enum.Font.GothamMedium
+fovLabel.TextXAlignment = Enum.TextXAlignment.Left
+fovLabel.ZIndex = 1000
+fovLabel.Parent = fovSliderFrame
+
+local fovTrack = Instance.new("Frame")
+fovTrack.Size = UDim2.new(1, 0, 0, 5)
+fovTrack.Position = UDim2.new(0, 0, 0, 26)
+fovTrack.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+fovTrack.BorderSizePixel = 0
+fovTrack.ZIndex = 1000
+fovTrack.Parent = fovSliderFrame
+Instance.new("UICorner", fovTrack).CornerRadius = UDim.new(1, 0)
+
+local fovFill = Instance.new("Frame")
+fovFill.Size = UDim2.new(120/400, 0, 1, 0)
+fovFill.BackgroundColor3 = Color3.fromRGB(0, 230, 118)
+fovFill.BorderSizePixel = 0
+fovFill.ZIndex = 1000
+fovFill.Parent = fovTrack
+Instance.new("UICorner", fovFill).CornerRadius = UDim.new(1, 0)
+
+local fovBtn = Instance.new("TextButton")
+fovBtn.Size = UDim2.new(0, 16, 0, 16)
+fovBtn.Position = UDim2.new(120/400, -8, 0, -5.5)
+fovBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+fovBtn.Text = ""
+fovBtn.ZIndex = 1000
+fovBtn.Parent = fovTrack
+Instance.new("UICorner", fovBtn).CornerRadius = UDim.new(1, 0)
+
+local fovSliding = false
+fovBtn.MouseButton1Down:Connect(function() fovSliding = true end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        fovSliding = false
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if fovSliding and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local pos = input.Position.X
+        local absPos = fovTrack.AbsolutePosition.X
+        local absSize = fovTrack.AbsoluteSize.X
+        local rel = math.clamp((pos - absPos) / absSize, 0, 1)
+        fovFill.Size = UDim2.new(rel, 0, 1, 0)
+        fovBtn.Position = UDim2.new(rel, -8, 0, -5.5)
+        fovRadiusVal = math.floor(rel * 350 + 50)
+        fovCircle.Radius = fovRadiusVal
+        fovLabel.Text = "FOV Range: " .. fovRadiusVal .. " (Max: 400)"
+    end
 end)
 
 -- Aimbot Harici Tutma (Ignore / Blacklist) Listesi Başlığı
@@ -385,9 +474,6 @@ UserInputService.InputChanged:Connect(function(input)
         speedLabel.Text = "Speed Value: " .. speedVal .. " (Max: 255)"
     end
 end)
-
-addToggle(pageMovement, "Fly (Flight)", function(state) flyActive = state end)
-
 -- Fly Speed Slider
 local flySliderFrame = Instance.new("Frame")
 flySliderFrame.Size = UDim2.new(0, 345, 0, 45)
@@ -469,6 +555,7 @@ addToggle(pageVisuals, "Fullbright (No Darkness)", function(state)
         Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
     end
 end)
+
 -- TELEPORT SECTION
 local escapeBtn = Instance.new("TextButton")
 escapeBtn.Size = UDim2.new(0, 345, 0, 35)
@@ -507,7 +594,7 @@ escape2Btn.MouseButton1Click:Connect(function()
     pcall(function()
         local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
         if myRoot then
-            myRoot.CFrame = CFrame.new(880.7, 69.6, -1036.8)
+            myRoot.CFrame = CFrame.new(879.2, 66.4, -1050.1)
         end
     end)
 end)
@@ -550,6 +637,55 @@ nukeBtn.MouseButton1Click:Connect(function()
         local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
         if myRoot then
             myRoot.CFrame = CFrame.new(1472.7, 175.9, -1231.7)
+        end
+    end)
+end)
+
+-- KONUM KAYDETME & GERİ IŞINLANMA (Save Position & TP to Saved)
+local savePosBtn = Instance.new("TextButton")
+savePosBtn.Size = UDim2.new(0, 345, 0, 35)
+savePosBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 160)
+savePosBtn.BorderSizePixel = 0
+savePosBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+savePosBtn.TextSize = 11
+savePosBtn.Font = Enum.Font.GothamBold
+savePosBtn.Text = "Save Position (Konum Kaydet)"
+savePosBtn.ZIndex = 1000
+savePosBtn.Parent = pageTeleport
+Instance.new("UICorner", savePosBtn).CornerRadius = UDim.new(0, 6)
+
+savePosBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if myRoot then
+            savedCFrame = myRoot.CFrame
+            savePosBtn.Text = "Position Saved! (Kaydedildi)"
+            task.delay(1.5, function()
+                savePosBtn.Text = "Save Position (Konum Kaydet)"
+            end)
+        end
+    end)
+end)
+
+local tpSavedBtn = Instance.new("TextButton")
+tpSavedBtn.Size = UDim2.new(0, 345, 0, 35)
+tpSavedBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 100)
+tpSavedBtn.BorderSizePixel = 0
+tpSavedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+tpSavedBtn.TextSize = 11
+tpSavedBtn.Font = Enum.Font.GothamBold
+tpSavedBtn.Text = "TP to Saved Position (Kaydedilene Git)"
+tpSavedBtn.ZIndex = 1000
+tpSavedBtn.Parent = pageTeleport
+Instance.new("UICorner", tpSavedBtn).CornerRadius = UDim.new(0, 6)
+
+tpSavedBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        if savedCFrame then
+            local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if myRoot then
+                myRoot.CFrame = savedCFrame
+            end
         end
     end)
 end)
@@ -614,7 +750,6 @@ refreshPlayerList = function()
     playerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, playerListLayout.AbsoluteContentSize.Y + 10)
 end
 
--- Sekmelere tıklandığında ve oyuncu girip çıktığında listeleri otomatik ve canlı yenile
 combatTabBtn.MouseButton1Click:Connect(refreshCombatList)
 tpTabBtn.MouseButton1Click:Connect(refreshPlayerList)
 
@@ -785,7 +920,8 @@ RunService.RenderStepped:Connect(function()
                     local pos, onScreen = camera:WorldToViewportPoint(head.Position)
                     if onScreen then
                         local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
-                        if dist < minDist then
+                        -- Dinamik FOV Yarıçapı Kontrolü
+                        if dist <= fovRadiusVal and dist < minDist then
                             local canSee = true
                             if wallCheckActive then
                                 local rayParams = RaycastParams.new()
@@ -811,3 +947,4 @@ RunService.RenderStepped:Connect(function()
         end
     end
 end)
+
