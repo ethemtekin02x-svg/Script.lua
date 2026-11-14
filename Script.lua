@@ -237,7 +237,6 @@ end
 local aimbotActive = false
 local wallCheckActive = true
 local fovCircleActive = false
-local triggerBotActive = false
 local speedActive = false
 local speedVal = 16
 local flyActive = false
@@ -253,7 +252,6 @@ addToggle(pageCombat, "FOV Circle (Show Range)", function(state)
     fovCircleActive = state
     fovCircle.Visible = state
 end)
-addToggle(pageCombat, "TriggerBot (Auto Shoot)", function(state) triggerBotActive = state end)
 
 addToggle(pageMovement, "Speed Hack", function(state) speedActive = state end)
 
@@ -469,7 +467,7 @@ nukeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- OYUNCU SEÇEREK IŞINLANMA (Player List)
+-- OYUNCU SEÇEREK IŞINLANMA (Player List - Düzeltildi)
 local playerListLabel = Instance.new("TextLabel")
 playerListLabel.Size = UDim2.new(0, 345, 0, 20)
 playerListLabel.BackgroundTransparency = 1
@@ -623,7 +621,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Fly, Speed, FOV ve Aimbot Motoru
+-- Fly, Speed, FOV ve Aimbot Motoru (TriggerBot Kaldırıldı)
 local bv, bg
 RunService.RenderStepped:Connect(function()
     local char = localPlayer.Character
@@ -705,9 +703,6 @@ RunService.RenderStepped:Connect(function()
 
         if target then
             camera.CFrame = CFrame.new(camera.CFrame.Position, target.Position)
-            if triggerBotActive then
-                mouse1click()
-            end
         end
     end
 end)
