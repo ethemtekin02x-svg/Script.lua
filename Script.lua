@@ -267,15 +267,15 @@ local infJumpActive = false
 local espActive = false
 local fullbrightActive = false
 
--- Kaydedilen Konum Değişkeni (Save Position)
+-- Kaydedilen Konum Değişkeni
 local savedCFrame = nil
 
 -- Hariç Tutulacak (Ignored / Blacklist) Oyuncular Tablosu
 local ignoredTargets = {}
 
-addToggle(pageCombat, "Aimbot (Auto-Lock)", function(state) aimbotActive = state end)
-addToggle(pageCombat, "Wall Check (No Wall Aim)", function(state) wallCheckActive = state end)
-addToggle(pageCombat, "FOV Circle (Show Range)", function(state)
+addToggle(pageCombat, "Aimbot", function(state) aimbotActive = state end)
+addToggle(pageCombat, "Wall Check", function(state) wallCheckActive = state end)
+addToggle(pageCombat, "FOV Circle", function(state)
     fovCircleActive = state
     fovCircle.Visible = state
 end)
@@ -290,7 +290,7 @@ fovSliderFrame.Parent = pageCombat
 local fovLabel = Instance.new("TextLabel")
 fovLabel.Size = UDim2.new(1, 0, 0, 18)
 fovLabel.BackgroundTransparency = 1
-fovLabel.Text = "FOV Range: 120 (Max: 400)"
+fovLabel.Text = "FOV Range: 120"
 fovLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
 fovLabel.TextSize = 11
 fovLabel.Font = Enum.Font.GothamMedium
@@ -341,15 +341,15 @@ UserInputService.InputChanged:Connect(function(input)
         fovBtn.Position = UDim2.new(rel, -8, 0, -5.5)
         fovRadiusVal = math.floor(rel * 350 + 50)
         fovCircle.Radius = fovRadiusVal
-        fovLabel.Text = "FOV Range: " .. fovRadiusVal .. " (Max: 400)"
+        fovLabel.Text = "FOV Range: " .. fovRadiusVal
     end
 end)
 
--- Aimbot Harici Tutma (Ignore / Blacklist) Listesi Başlığı
+-- Aimbot Ignore Listesi Başlığı
 local targetListLabel = Instance.new("TextLabel")
 targetListLabel.Size = UDim2.new(0, 345, 0, 20)
 targetListLabel.BackgroundTransparency = 1
-targetListLabel.Text = "--- Ignore / Blacklist (Aimbot Exclude) ---"
+targetListLabel.Text = "--- Ignore / Blacklist ---"
 targetListLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
 targetListLabel.TextSize = 11
 targetListLabel.Font = Enum.Font.GothamBold
@@ -421,7 +421,7 @@ speedSliderFrame.Parent = pageMovement
 local speedLabel = Instance.new("TextLabel")
 speedLabel.Size = UDim2.new(1, 0, 0, 18)
 speedLabel.BackgroundTransparency = 1
-speedLabel.Text = "Speed Value: 16 (Max: 255)"
+speedLabel.Text = "Speed Value: 16"
 speedLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
 speedLabel.TextSize = 11
 speedLabel.Font = Enum.Font.GothamMedium
@@ -471,11 +471,11 @@ UserInputService.InputChanged:Connect(function(input)
         speedFill.Size = UDim2.new(rel, 0, 1, 0)
         speedBtn.Position = UDim2.new(rel, -8, 0, -5.5)
         speedVal = math.floor(rel * 254 + 1)
-        speedLabel.Text = "Speed Value: " .. speedVal .. " (Max: 255)"
+        speedLabel.Text = "Speed Value: " .. speedVal
     end
 end)
 
-addToggle(pageMovement, "Fly (Flight)", function(state) flyActive = state end)
+addToggle(pageMovement, "Fly", function(state) flyActive = state end)
 
 -- Fly Speed Slider
 local flySliderFrame = Instance.new("Frame")
@@ -487,7 +487,7 @@ flySliderFrame.Parent = pageMovement
 local flyLabel = Instance.new("TextLabel")
 flyLabel.Size = UDim2.new(1, 0, 0, 18)
 flyLabel.BackgroundTransparency = 1
-flyLabel.Text = "Fly Speed: 50 (Max: 200)"
+flyLabel.Text = "Fly Speed: 50"
 flyLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
 flyLabel.TextSize = 11
 flyLabel.Font = Enum.Font.GothamMedium
@@ -537,7 +537,7 @@ UserInputService.InputChanged:Connect(function(input)
         flyFill.Size = UDim2.new(rel, 0, 1, 0)
         flyBtn.Position = UDim2.new(rel, -8, 0, -5.5)
         flySpeedVal = math.floor(rel * 190 + 10)
-        flyLabel.Text = "Fly Speed: " .. flySpeedVal .. " (Max: 200)"
+        flyLabel.Text = "Fly Speed: " .. flySpeedVal
     end
 end)
 
@@ -545,8 +545,8 @@ addToggle(pageMovement, "Noclip", function(state) noclipActive = state end)
 addToggle(pageMovement, "Infinite Jump", function(state) infJumpActive = state end)
 
 -- VISUALS SECTION
-addToggle(pageVisuals, "Advanced ESP (Box + Info)", function(state) espActive = state end)
-addToggle(pageVisuals, "Fullbright (No Darkness)", function(state)
+addToggle(pageVisuals, "ESP", function(state) espActive = state end)
+addToggle(pageVisuals, "Fullbright", function(state)
     fullbrightActive = state
     if fullbrightActive then
         Lighting.Brightness = 2
@@ -644,7 +644,7 @@ nukeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- KONUM KAYDETME & GERİ IŞINLANMA (Save Position & TP to Saved)
+-- SAVE POSITION & TP TO SAVED
 local savePosBtn = Instance.new("TextButton")
 savePosBtn.Size = UDim2.new(0, 345, 0, 35)
 savePosBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 160)
@@ -652,7 +652,7 @@ savePosBtn.BorderSizePixel = 0
 savePosBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 savePosBtn.TextSize = 11
 savePosBtn.Font = Enum.Font.GothamBold
-savePosBtn.Text = "Save Position (Konum Kaydet)"
+savePosBtn.Text = "Save Position"
 savePosBtn.ZIndex = 1000
 savePosBtn.Parent = pageTeleport
 Instance.new("UICorner", savePosBtn).CornerRadius = UDim.new(0, 6)
@@ -662,9 +662,9 @@ savePosBtn.MouseButton1Click:Connect(function()
         local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
         if myRoot then
             savedCFrame = myRoot.CFrame
-            savePosBtn.Text = "Position Saved! (Kaydedildi)"
+            savePosBtn.Text = "Position Saved!"
             task.delay(1.5, function()
-                savePosBtn.Text = "Save Position (Konum Kaydet)"
+                savePosBtn.Text = "Save Position"
             end)
         end
     end)
@@ -677,7 +677,7 @@ tpSavedBtn.BorderSizePixel = 0
 tpSavedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 tpSavedBtn.TextSize = 11
 tpSavedBtn.Font = Enum.Font.GothamBold
-tpSavedBtn.Text = "TP to Saved Position (Kaydedilene Git)"
+tpSavedBtn.Text = "TP to Saved"
 tpSavedBtn.ZIndex = 1000
 tpSavedBtn.Parent = pageTeleport
 Instance.new("UICorner", tpSavedBtn).CornerRadius = UDim.new(0, 6)
@@ -864,7 +864,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Fly, Speed, FOV ve Ignore (Blacklist) Aimbot Motoru
+-- Fly, Speed, FOV ve Ignore Aimbot Motoru
 local bv, bg
 RunService.RenderStepped:Connect(function()
     local char = localPlayer.Character
@@ -923,7 +923,6 @@ RunService.RenderStepped:Connect(function()
                     local pos, onScreen = camera:WorldToViewportPoint(head.Position)
                     if onScreen then
                         local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
-                        -- Dinamik FOV Yarıçapı Kontrolü
                         if dist <= fovRadiusVal and dist < minDist then
                             local canSee = true
                             if wallCheckActive then
