@@ -717,7 +717,7 @@ end)
 task.spawn(refreshPlayerList)
 task.spawn(refreshCombatList)
 
--- Takım Renkleri Fonksiyonu
+-- Takım Renkleri Fonksiyonu (Chaos Insurgency - CI Eklendi)
 local function getTeamColor(player)
     if player.Team then
         local tName = player.Team.Name:lower()
