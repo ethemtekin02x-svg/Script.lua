@@ -168,7 +168,7 @@ local function createTab(name)
     page.Size = UDim2.new(1, 0, 1, 0)
     page.BackgroundTransparency = 1
     page.Visible = false
-    page.CanvasSize = UDim2.new(0, 0, 0, 1000)
+    page.CanvasSize = UDim2.new(0, 0, 0, 1300)
     page.ScrollBarThickness = 4
     page.ZIndex = 1000
     page.Parent = contentFrame
@@ -246,12 +246,82 @@ local infJumpActive = false
 local espActive = false
 local fullbrightActive = false
 
+-- Seçilen / Hedef Alınacak Oyuncular Tablosu (Whitelist / Target List)
+local selectedTargets = {}
+
 addToggle(pageCombat, "Aimbot (Auto-Lock)", function(state) aimbotActive = state end)
 addToggle(pageCombat, "Wall Check (No Wall Aim)", function(state) wallCheckActive = state end)
 addToggle(pageCombat, "FOV Circle (Show Range)", function(state)
     fovCircleActive = state
     fovCircle.Visible = state
 end)
+
+-- Aimbot Hedef Seçim Listesi Başlığı
+local targetListLabel = Instance.new("TextLabel")
+targetListLabel.Size = UDim2.new(0, 345, 0, 20)
+targetListLabel.BackgroundTransparency = 1
+targetListLabel.Text = "--- Select Target / Whitelist (Head 3D) ---"
+targetListLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
+targetListLabel.TextSize = 11
+targetListLabel.Font = Enum.Font.GothamBold
+targetListLabel.ZIndex = 1000
+targetListLabel.Parent = pageCombat
+
+local combatScrollFrame = Instance.new("ScrollingFrame")
+combatScrollFrame.Size = UDim2.new(0, 345, 0, 120)
+combatScrollFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
+combatScrollFrame.BorderSizePixel = 0
+combatScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+combatScrollFrame.ScrollBarThickness = 4
+combatScrollFrame.ZIndex = 1000
+combatScrollFrame.Parent = pageCombat
+Instance.new("UICorner", combatScrollFrame).CornerRadius = UDim.new(0, 6)
+
+local combatListLayout = Instance.new("UIListLayout")
+combatListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+combatListLayout.Padding = UDim.new(0, 5)
+combatListLayout.Parent = combatScrollFrame
+
+local function refreshCombatList()
+    for _, v in pairs(combatScrollFrame:GetChildren()) do
+        if v:IsA("TextButton") then v:Destroy() end
+    end
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= localPlayer then
+            local pBtn = Instance.new("TextButton")
+            pBtn.Size = UDim2.new(1, -10, 0, 32)
+            local isSel = selectedTargets[player]
+            pBtn.BackgroundColor3 = isSel and Color3.fromRGB(0, 140, 70) or Color3.fromRGB(35, 35, 45)
+            pBtn.BorderSizePixel = 0
+            pBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            pBtn.TextSize = 11
+            pBtn.Font = Enum.Font.GothamMedium
+            pBtn.Text = (isSel and "[SELECTED] " or "[ ] ") .. player.Name .. " (Head 3D)"
+            pBtn.ZIndex = 1000
+            pBtn.Parent = combatScrollFrame
+            Instance.new("UICorner", pBtn).CornerRadius = UDim.new(0, 4)
+
+            pBtn.MouseButton1Click:Connect(function()
+                if selectedTargets[player] then
+                    selectedTargets[player] = nil
+                    pBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+                    pBtn.Text = "[ ] " .. player.Name .. " (Head 3D)"
+                else
+                    selectedTargets[player] = true
+                    pBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 70)
+                    pBtn.Text = "[SELECTED] " .. player.Name .. " (Head 3D)"
+                end
+            end)
+        end
+    end
+    combatScrollFrame.CanvasSize = UDim2.new(0, 0, 0, combatListLayout.AbsoluteContentSize.Y + 10)
+end
+
+Players.PlayerAdded:Connect(refreshPlayerList or refreshCombatList)
+Players.PlayerRemoving:Connect(refreshPlayerList or refreshCombatList)
+task.spawn(refreshCombatList)
+
 
 addToggle(pageMovement, "Speed Hack", function(state) speedActive = state end)
 
@@ -402,7 +472,6 @@ addToggle(pageVisuals, "Fullbright (No Darkness)", function(state)
         Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
     end
 end)
-
 -- TELEPORT SECTION
 local escapeBtn = Instance.new("TextButton")
 escapeBtn.Size = UDim2.new(0, 345, 0, 35)
@@ -421,6 +490,27 @@ escapeBtn.MouseButton1Click:Connect(function()
         local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
         if myRoot then
             myRoot.CFrame = CFrame.new(1207.3, 131.8, -683.2)
+        end
+    end)
+end)
+
+local escape2Btn = Instance.new("TextButton")
+escape2Btn.Size = UDim2.new(0, 345, 0, 35)
+escape2Btn.BackgroundColor3 = Color3.fromRGB(210, 90, 0)
+escape2Btn.BorderSizePixel = 0
+escape2Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+escape2Btn.TextSize = 11
+escape2Btn.Font = Enum.Font.GothamBold
+escape2Btn.Text = "Escape Prison 2"
+escape2Btn.ZIndex = 1000
+escape2Btn.Parent = pageTeleport
+Instance.new("UICorner", escape2Btn).CornerRadius = UDim.new(0, 6)
+
+escape2Btn.MouseButton1Click:Connect(function()
+    pcall(function()
+        local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if myRoot then
+            myRoot.CFrame = CFrame.new(880.7, 69.6, -1036.8)
         end
     end)
 end)
@@ -467,11 +557,11 @@ nukeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- OYUNCU SEÇEREK IŞINLANMA (Garantili Oyuncu Listesi)
+-- OYUNCU SEÇEREK IŞINLANMA (Player List)
 local playerListLabel = Instance.new("TextLabel")
 playerListLabel.Size = UDim2.new(0, 345, 0, 20)
 playerListLabel.BackgroundTransparency = 1
-playerListLabel.Text = "--- Select Player to Teleport ---"
+playerListLabel.Text = "--- Select Player to Teleport (Head 3D) ---"
 playerListLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
 playerListLabel.TextSize = 11
 playerListLabel.Font = Enum.Font.GothamBold
@@ -494,7 +584,6 @@ playerListLayout.Padding = UDim.new(0, 5)
 playerListLayout.Parent = playerScrollFrame
 
 local function refreshPlayerList()
-    -- Eski butonları temizle
     for _, v in pairs(playerScrollFrame:GetChildren()) do
         if v:IsA("TextButton") then v:Destroy() end
     end
@@ -508,17 +597,18 @@ local function refreshPlayerList()
             pBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
             pBtn.TextSize = 11
             pBtn.Font = Enum.Font.GothamMedium
-            pBtn.Text = player.Name .. " (" .. player.DisplayName .. ")"
+            pBtn.Text = player.Name .. " (" .. player.DisplayName .. ") [Head]"
             pBtn.ZIndex = 1000
             pBtn.Parent = playerScrollFrame
             Instance.new("UICorner", pBtn).CornerRadius = UDim.new(0, 4)
 
             pBtn.MouseButton1Click:Connect(function()
                 pcall(function()
-                    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    if player.Character and player.Character:FindFirstChild("Head") then
                         local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
                         if myRoot then
-                            myRoot.CFrame = player.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+                            -- Oyuncunun 3D kafa pozisyonuna ışınlanma
+                            myRoot.CFrame = player.Character.Head.CFrame + Vector3.new(0, 3, 0)
                         end
                     end
                 end)
@@ -527,13 +617,20 @@ local function refreshPlayerList()
     end
     playerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, playerListLayout.AbsoluteContentSize.Y + 10)
 end
--- Teleport sekmesine tıklandığı an listeyi otomatik yenile
+
 tpTabBtn.MouseButton1Click:Connect(function()
     refreshPlayerList()
+    refreshCombatList()
 end)
 
-Players.PlayerAdded:Connect(refreshPlayerList)
-Players.PlayerRemoving:Connect(refreshPlayerList)
+Players.PlayerAdded:Connect(function()
+    refreshPlayerList()
+    refreshCombatList()
+end)
+Players.PlayerRemoving:Connect(function()
+    refreshPlayerList()
+    refreshCombatList()
+end)
 task.spawn(refreshPlayerList)
 
 -- Takım Renkleri Fonksiyonu
@@ -631,7 +728,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Fly, Speed, FOV ve Aimbot Motoru
+-- Fly, Speed, FOV ve Seçmeli Whitelist Head Aimbot Motoru
 local bv, bg
 RunService.RenderStepped:Connect(function()
     local char = localPlayer.Character
@@ -681,7 +778,8 @@ RunService.RenderStepped:Connect(function()
         local center = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
 
         for _, player in pairs(Players:GetPlayers()) do
-            if player ~= localPlayer and player.Character then
+            -- Sadece whitelist listende seçili olan oyuncuları hedef al
+            if player ~= localPlayer and selectedTargets[player] and player.Character then
                 local pChar = player.Character
                 local head = pChar:FindFirstChild("Head")
                 local pHum = pChar:FindFirstChildOfClass("Humanoid")
@@ -703,7 +801,7 @@ RunService.RenderStepped:Connect(function()
                             end
                             if canSee then
                                 minDist = dist
-                                target = head
+                                target = head -- 3D Kafa Hedefi
                             end
                         end
                     end
