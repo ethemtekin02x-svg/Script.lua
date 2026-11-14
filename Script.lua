@@ -226,7 +226,7 @@ end
 -- Değişkenler
 local aimbotActive = false
 local wallCheckActive = true
-local teamCheckActive = true
+local teamCheckActive = false -- Varsayılan kapalı yapıldı ki kimse takıldı diye aim gitmezlik yapmasın
 local speedActive = false
 local speedVal = 16
 local flyActive = false
@@ -238,7 +238,7 @@ local fullbrightActive = false
 
 addToggle(pageCombat, "Aimbot (Auto-Lock)", function(state) aimbotActive = state end)
 addToggle(pageCombat, "Wall Check (No Wall Aim)", function(state) wallCheckActive = state end)
-addToggle(pageCombat, "Team Check (Strict)", function(state) teamCheckActive = state end)
+addToggle(pageCombat, "Team Check (Safe Filter)", function(state) teamCheckActive = state end)
 
 addToggle(pageMovement, "Speed Hack", function(state) speedActive = state end)
 
@@ -531,8 +531,7 @@ local function getTeamColor(player)
         elseif tName:find("mtf") or tName:find("mobile task") then
             return Color3.fromRGB(0, 120, 255)
         elseif tName:find("yonetici") or tName:find("site director") then
-            stringColor = Color3.fromRGB(200, 0, 200)
-            return stringColor
+            return Color3.fromRGB(200, 0, 200)
         elseif tName:find("ci") or tName:find("chaos") then
             return Color3.fromRGB(0, 180, 80)
         else
@@ -613,7 +612,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Fly, Speed & Kesin Takım Filtreli Aimbot Motoru
+-- Fly, Speed & Kesintisiz Kararlı Aimbot Motoru
 local bv, bg
 RunService.RenderStepped:Connect(function()
     local char = localPlayer.Character
@@ -666,15 +665,9 @@ RunService.RenderStepped:Connect(function()
             if player ~= localPlayer then
                 local isTeamMate = false
                 
-                -- KESİN TAKIM KONTROLÜ (Team Check)
-                if teamCheckActive then
-                    if localPlayer.Team and player.Team then
-                        if localPlayer.Team == player.Team then
-                            isTeamMate = true
-                        end
-                    end
-                    -- Ekstra Güvenlik: Eğer oyun içi takım isimleri veya renkleri birebir tutuyorsa takımdadır
-                    if player.TeamColor and localPlayer.TeamColor and player.TeamColor == localPlayer.TeamColor then
+                -- Team Check açıksa ve takım verileri tam eşleşiyorsa pas geç
+                if teamCheckActive and localPlayer.Team and player.Team then
+                    if localPlayer.Team == player.Team then
                         isTeamMate = true
                     end
                 end
