@@ -267,9 +267,6 @@ local infJumpActive = false
 local espActive = false
 local fullbrightActive = false
 
--- Kaydedilen Konum Değişkeni
-local savedCFrame = nil
-
 -- Hariç Tutulacak (Ignored / Blacklist) Oyuncular Tablosu
 local ignoredTargets = {}
 
@@ -644,55 +641,6 @@ nukeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- SAVE POSITION & TP TO SAVED
-local savePosBtn = Instance.new("TextButton")
-savePosBtn.Size = UDim2.new(0, 345, 0, 35)
-savePosBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 160)
-savePosBtn.BorderSizePixel = 0
-savePosBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-savePosBtn.TextSize = 11
-savePosBtn.Font = Enum.Font.GothamBold
-savePosBtn.Text = "Save Position"
-savePosBtn.ZIndex = 1000
-savePosBtn.Parent = pageTeleport
-Instance.new("UICorner", savePosBtn).CornerRadius = UDim.new(0, 6)
-
-savePosBtn.MouseButton1Click:Connect(function()
-    pcall(function()
-        local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if myRoot then
-            savedCFrame = myRoot.CFrame
-            savePosBtn.Text = "Position Saved!"
-            task.delay(1.5, function()
-                savePosBtn.Text = "Save Position"
-            end)
-        end
-    end)
-end)
-
-local tpSavedBtn = Instance.new("TextButton")
-tpSavedBtn.Size = UDim2.new(0, 345, 0, 35)
-tpSavedBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 100)
-tpSavedBtn.BorderSizePixel = 0
-tpSavedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-tpSavedBtn.TextSize = 11
-tpSavedBtn.Font = Enum.Font.GothamBold
-tpSavedBtn.Text = "TP to Saved"
-tpSavedBtn.ZIndex = 1000
-tpSavedBtn.Parent = pageTeleport
-Instance.new("UICorner", tpSavedBtn).CornerRadius = UDim.new(0, 6)
-
-tpSavedBtn.MouseButton1Click:Connect(function()
-    pcall(function()
-        if savedCFrame then
-            local myRoot = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if myRoot then
-                myRoot.CFrame = savedCFrame
-            end
-        end
-    end)
-end)
-
 -- OYUNCU SEÇEREK IŞINLANMA (Player List)
 local playerListLabel = Instance.new("TextLabel")
 playerListLabel.Size = UDim2.new(0, 345, 0, 20)
@@ -705,7 +653,7 @@ playerListLabel.ZIndex = 1000
 playerListLabel.Parent = pageTeleport
 
 local playerScrollFrame = Instance.new("ScrollingFrame")
-playerScrollFrame.Size = UDim2.new(0, 345, 0, 130)
+playerScrollFrame.Size = UDim2.new(0, 345, 0, 150)
 playerScrollFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
 playerScrollFrame.BorderSizePixel = 0
 playerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
