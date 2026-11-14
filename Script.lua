@@ -195,13 +195,13 @@ local function createTab(name)
         btn.TextColor3 = Color3.fromRGB(0, 230, 118)
     end
     table.insert(pages, page)
-    return page
+    return page, btn
 end
 
 local pageCombat = createTab("Combat")
 local pageMovement = createTab("Movement")
 local pageVisuals = createTab("Visuals")
-local pageTeleport = createTab("Teleport")
+local pageTeleport, tpTabBtn = createTab("Teleport")
 
 -- Toggle Helper
 local function addToggle(parent, text, callback)
@@ -467,7 +467,7 @@ nukeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- OYUNCU SEÇEREK IŞINLANMA (Player List - Düzeltildi)
+-- OYUNCU SEÇEREK IŞINLANMA (Garantili Oyuncu Listesi)
 local playerListLabel = Instance.new("TextLabel")
 playerListLabel.Size = UDim2.new(0, 345, 0, 20)
 playerListLabel.BackgroundTransparency = 1
@@ -479,7 +479,7 @@ playerListLabel.ZIndex = 1000
 playerListLabel.Parent = pageTeleport
 
 local playerScrollFrame = Instance.new("ScrollingFrame")
-playerScrollFrame.Size = UDim2.new(0, 345, 0, 110)
+playerScrollFrame.Size = UDim2.new(0, 345, 0, 130)
 playerScrollFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
 playerScrollFrame.BorderSizePixel = 0
 playerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -494,6 +494,7 @@ playerListLayout.Padding = UDim.new(0, 5)
 playerListLayout.Parent = playerScrollFrame
 
 local function refreshPlayerList()
+    -- Eski butonları temizle
     for _, v in pairs(playerScrollFrame:GetChildren()) do
         if v:IsA("TextButton") then v:Destroy() end
     end
@@ -526,6 +527,15 @@ local function refreshPlayerList()
     end
     playerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, playerListLayout.AbsoluteContentSize.Y + 10)
 end
+-- Teleport sekmesine tıklandığı an listeyi otomatik yenile
+tpTabBtn.MouseButton1Click:Connect(function()
+    refreshPlayerList()
+end)
+
+Players.PlayerAdded:Connect(refreshPlayerList)
+Players.PlayerRemoving:Connect(refreshPlayerList)
+task.spawn(refreshPlayerList)
+
 -- Takım Renkleri Fonksiyonu
 local function getTeamColor(player)
     if player.Team then
@@ -621,7 +631,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Fly, Speed, FOV ve Aimbot Motoru (TriggerBot Kaldırıldı)
+-- Fly, Speed, FOV ve Aimbot Motoru
 local bv, bg
 RunService.RenderStepped:Connect(function()
     local char = localPlayer.Character
