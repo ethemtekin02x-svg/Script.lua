@@ -198,7 +198,7 @@ local function createTab(name)
     return page, btn
 end
 
-local pageCombat = createTab("Combat")
+local pageCombat, combatTabBtn = createTab("Combat")
 local pageMovement = createTab("Movement")
 local pageVisuals = createTab("Visuals")
 local pageTeleport, tpTabBtn = createTab("Teleport")
@@ -282,7 +282,9 @@ combatListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 combatListLayout.Padding = UDim.new(0, 5)
 combatListLayout.Parent = combatScrollFrame
 
-local function refreshCombatList()
+local refreshPlayerList, refreshCombatList
+
+refreshCombatList = function()
     for _, v in pairs(combatScrollFrame:GetChildren()) do
         if v:IsA("TextButton") then v:Destroy() end
     end
@@ -552,7 +554,7 @@ nukeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- OYUNCU SEÇEREK IŞINLANMA (Player List - Sadece İsim)
+-- OYUNCU SEÇEREK IŞINLANMA (Player List)
 local playerListLabel = Instance.new("TextLabel")
 playerListLabel.Size = UDim2.new(0, 345, 0, 20)
 playerListLabel.BackgroundTransparency = 1
@@ -578,7 +580,7 @@ playerListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 playerListLayout.Padding = UDim.new(0, 5)
 playerListLayout.Parent = playerScrollFrame
 
-local function refreshPlayerList()
+refreshPlayerList = function()
     for _, v in pairs(playerScrollFrame:GetChildren()) do
         if v:IsA("TextButton") then v:Destroy() end
     end
@@ -612,19 +614,20 @@ local function refreshPlayerList()
     playerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, playerListLayout.AbsoluteContentSize.Y + 10)
 end
 
-tpTabBtn.MouseButton1Click:Connect(function()
-    refreshPlayerList()
-    refreshCombatList()
-end)
+-- Sekmelere tıklandığında ve oyuncu girip çıktığında listeleri otomatik ve canlı yenile
+combatTabBtn.MouseButton1Click:Connect(refreshCombatList)
+tpTabBtn.MouseButton1Click:Connect(refreshPlayerList)
 
 Players.PlayerAdded:Connect(function()
     refreshPlayerList()
     refreshCombatList()
 end)
+
 Players.PlayerRemoving:Connect(function()
     refreshPlayerList()
     refreshCombatList()
 end)
+
 task.spawn(refreshPlayerList)
 task.spawn(refreshCombatList)
 
